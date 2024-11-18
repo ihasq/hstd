@@ -11,9 +11,9 @@ function Component() {
         <h1>Count is ${count}</h1>
         <button ${{ [on.click]: () => count.$++ }}>
             Add more!
-        </button>;
-    `
+        </button>
+    `;
 }
 
-document.body.innerHTML = Component();
+document.body.append(...html`<label>${performance.now()}</label>`);
 ```

@@ -100,15 +100,21 @@ const fragmentTemp = {
 }
 
 export const h = (s, ...v) => {
-	return Object_assign({
-		0: s,
-		1: v,
-		2: STRIX_HTML_IDENTIFIER,
-		s,
-		v,
-		[STRIX_HTML_IDENTIFIER]: true,
+	return Object_assign(
+		function*() {
+			
+		},
+		{
+			0: s,
+			1: v,
+			2: STRIX_HTML_IDENTIFIER,
+			s,
+			v,
+			[STRIX_HTML_IDENTIFIER]: true,
 
-	}, fragmentTemp);
+		},
+		fragmentTemp
+	);
 }
 
 
