@@ -1,7 +1,12 @@
 # h
 
 ```javascript
+// Import some stuff
+
 import { $, h as html, on } from "jsr:@ihasq/h"
+
+
+// Design your component
 
 function Component() {
 
@@ -15,5 +20,8 @@ function Component() {
     `;
 }
 
-document.body.append(...html`<label>${performance.now()}</label>`);
+
+// Put into the DOM
+
+document.body.append(...Component());
 ```
