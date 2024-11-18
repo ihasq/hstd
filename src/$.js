@@ -1,9 +1,11 @@
 const
-	RAF = globalThis.requestAnimationFrame,
-	Symbol_dispose = Symbol.dispose,
-	Symbol_toPrimitive  = Symbol.toPrimitive,
-	Object_assign = Object.assign,
-	Object_freeze = Object.freeze,
+	{
+		Array: { from: Array_from, isArray: Array_isArray },
+		Object: { assign: Object_assign, defineProperty: Object_defineProperty, freeze: Object_freeze },
+		Symbol: { dispose: Symbol_dispose, toPrimitive: Symbol_toPrimitive },
+		globalThis: GLOBALTHIS
+	} = globalThis,
+	RAF = GLOBALTHIS.requestAnimationFrame,
 	DISPOSER_TEMP = {
 		[Symbol_dispose]() {
 
@@ -31,14 +33,15 @@ const
 		let buf = Math.floor(Math.random() * 31)
 		return 0x7f + buf + (buf > 0x8d) + (buf > 0x9c) 
 	},
-	publishedPtr = {}
+	publishedPtr = {},
+	UNDEFINED = undefined
 ;
 
 let resolverSignature;
 
-while((resolverSignature = String.fromCharCode.apply(null, Array.from(resolverSignatureGenObj, resolverSignatureGenCB))) in globalThis) {};
+while((resolverSignature = String.fromCharCode.apply(null, Array_from(resolverSignatureGenObj, resolverSignatureGenCB))) in GLOBALTHIS) {};
 
-Object.defineProperty(globalThis, resolverSignature, {
+Object_defineProperty(GLOBALTHIS, resolverSignature, {
 	value: (symbol) => publishedPtr[symbol],
 	configurable: false,
 	enumerable: false
@@ -55,7 +58,7 @@ export const $ = (value, setterFn = setterFnTemp, options) => {
 		watchers = [],
 		watcherMap = new WeakMap()
 	;
-	return publishedPtr[symbol] = Object.freeze(Object.assign.apply(
+	return publishedPtr[symbol] = Object_freeze(Object.assign.apply(
 		null,
 		[
 			{
@@ -85,10 +88,10 @@ export const $ = (value, setterFn = setterFnTemp, options) => {
 					delete watchers[watcherMap.get(watcherFn) || -1]
 				}
 			},
-			"number string".includes(typeof value) ? PRIM_TEMP : undefined,
-			typeof value == "number" ? NUM_TEMP : undefined,
-			Array.isArray(value) ? ARR_TEMP : undefined,
-			Symbol_dispose ? DISPOSER_TEMP : undefined,
+			"number string".includes(typeof value) ? PRIM_TEMP : UNDEFINED,
+			typeof value == "number" ? NUM_TEMP : UNDEFINED,
+			Array_isArray(value) ? ARR_TEMP : UNDEFINED,
+			Symbol_dispose ? DISPOSER_TEMP : UNDEFINED,
 		]
 	))
 };

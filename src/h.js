@@ -5,7 +5,7 @@ const
 	{ toPrimitive: Symbol_toPrimitive, dispose: Symbol_dispose } = Symbol,
 	ESC_REGEX = /["&'<>`]/g,
 	ESC_CHARCODE_BUF = {},
-	ESC_FN = (match) => `&#x${ESC_CHARCODE_BUF[match] ||= match.charCodeAt(0).toString(16)};`,
+	ESC_FN = (match) => "&#x" + (ESC_CHARCODE_BUF[match] ||= match.charCodeAt(0).toString(16)) + ";",
 	initTasks = {}
 ;
 
@@ -14,32 +14,9 @@ let elementName;
 const OBJ_PROTO = Reflect.getPrototypeOf({});
 
 const
-	generateToken = () => {
-		let buf = Math.floor(Math.random() * 36) + 48;
-		return 39 * (buf > 57) + buf
-	},
+	generateToken = () => Math.floor(Math.random() * 36) + 97,
 	generatorTemp = { length: 6 }
 ;
-
-while(customElements.get(elementName = `s-${String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))}`)) {}
-
-customElements.define(elementName, class extends HTMLBRElement {
-	constructor() {
-		super();
-		this.hidden = true;
-	}
-	connectedCallback() {
-		const
-			shouldInit = document.querySelector(elementName) === this,
-			uuid = this.getAttribute("init-uuid")
-		;
-		this.remove();
-		if(uuid in initTasks && shouldInit) return;
-		const initTask = initTasks[uuid];
-		delete initTasks[uuid];
-		document.querySelectorAll(`[${uuid}]`).forEach(initTask);
-	}
-});
 
 const resolveTemp = (v) => {
 
@@ -66,6 +43,18 @@ const resolveFrag = ({ s, v }, cmd = []) => {
 	return cmd;
 }
 
+const structFrag = ({ s, v }, str = [], val = []) => {
+	str[str.length - 1] += s[0];
+	val.push(v[0])
+	v.forEach((vBuf, vIndex) => {
+		if(vBuf[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
+			structFrag(vBuf, str, val)
+		}
+		str.push(s[vIndex + 1])
+		val.push(vBuf)
+	})
+}
+
 const structTemp = (resolvedFrag, PARSER_UUID) => {
 	let resultBuf;
 	initTasks[PARSER_UUID] = (initTarget) => {
@@ -86,6 +75,15 @@ const structTemp = (resolvedFrag, PARSER_UUID) => {
 	return resultBuf;
 }
 
+// ihasq/h ❤ lit-html's textEndRegex
+const attrExt = new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*\\0`, "g");
+const nullExtAll = /\0/g;
+const nullExt = /\0/;
+const escExt = /\\((u\d{4})|(x[A-Fa-f0-9]{2})|(c[A-Za-Z])|([0\^\$\\\.\*\+\?\(\)\[\]\{\}\|\/])|([fnrtv]))/g
+
+const PTR_IDENTIFIER = Symbol();
+
+const df = document.createDocumentFragment();
 
 const fragmentTemp = {
 	then(onloadCallbackFn) {
@@ -94,28 +92,35 @@ const fragmentTemp = {
 		return this;
 	},
 	[Symbol_toPrimitive](hint) {
-		if(hint !== "string") return (hint === STRIX_HTML_IDENTIFIER || hint === "number") ? 0 : this;
-		return `<br is='${elementName}' init-uuid=${initUUID}>${structTemp(resolveFrag(this), initUUID)}`
+		return hint === PTR_IDENTIFIER
+	},
+	[Symbol.iterator]: function* () {
+		const str = [""], val = [];
+		structFrag(this, str, val);
+		let joined = str.join("\0");
+		let buf;
+		while(joined.includes("-" + (buf = String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))))) {}
+		const attrMatch = joined.matchAll(attrExt).map(({ index }) => index);
+		
+		joined.matchAll(nullExtAll).forEach(({ index }) => {
+			joined = joined.replace(
+				nullExt,
+				attrMatch.includes(index)
+				? ` h-${buf}="${index}" `
+				: "number string".includes(typeof val[index])
+				? val[index]
+				: "<!--" + buf + "-->" + val[index].$ + "<!--" + buf + "-->"
+			)
+		});
+		joined = joined.replaceAll(escExt, () => {
+
+		});
+		df.innerHTML = joined;
+		df.childNodes.forEach(childNode => yield childNode);
 	}
 }
 
-export const h = (s, ...v) => {
-	return Object_assign(
-		function*() {
-			
-		},
-		{
-			0: s,
-			1: v,
-			2: STRIX_HTML_IDENTIFIER,
-			s,
-			v,
-			[STRIX_HTML_IDENTIFIER]: true,
-
-		},
-		fragmentTemp
-	);
-}
+export const h = (s, ...v) => Object_assign({ s, v }, fragmentTemp);
 
 
 function Component() {
@@ -129,6 +134,10 @@ function Component() {
 	`
 }
 
-document.body.innerHTML = Component();
+[document.body] = html`
+	<body>
+		${Component()}
+	</body>
+`;
 
 // $
