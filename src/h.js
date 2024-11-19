@@ -1,143 +1,115 @@
-
-const { assign: Object_assign } = Object;
+// ihasq/h ❤ lit-html's textEndRegex
 
 const
+	{ assign: Object_assign, freeze: Object_freeze } = Object,
 	{ toPrimitive: Symbol_toPrimitive, dispose: Symbol_dispose } = Symbol,
+
 	ESC_REGEX = /["&'<>`]/g,
 	ESC_CHARCODE_BUF = {},
 	ESC_FN = (match) => "&#x" + (ESC_CHARCODE_BUF[match] ||= match.charCodeAt(0).toString(16)) + ";",
-	initTasks = {}
-;
 
-let elementName;
+	TOKEN_LENGTH = 6,
 
-const OBJ_PROTO = Reflect.getPrototypeOf({});
+	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
-const
-	generateToken = () => Math.floor(Math.random() * 36) + 97,
-	generatorTemp = { length: 6 }
-;
+	generateToken = () => Math.floor(Math.random() * 26) + 97,
+	generatorTemp = { length: TOKEN_LENGTH },
 
-const resolveTemp = (v) => {
+	structFrag = ({ s, v }, str = [], val = []) => {
+		str[str.length - 1] += s[0];
+		v.forEach((vBuf, vIndex) => {
+			if(vBuf[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
+				structFrag(vBuf, str, val)
+				str[str.length - 1] += s[vIndex + 1]
+			} else if("number string".includes(typeof vBuf)) {
+				str[str.length - 1] += String(vBuf).replaceAll(ESC_REGEX, ESC_FN) + s[vIndex + 1]
+			} else {
+				val.push(vBuf)
+				str.push(s[vIndex + 1])
+			}
+		})
 
-}
-
-const isPtr = (ptr) => {
-	const sym = ptr[Symbol_toPrimitive]?.();
-	return globalThis[sym?.description?.slice(0, 16)]?.(sym) === ptr;
-}
-
-const resolveFrag = ({ s, v }, cmd = []) => {
-	cmd.push([0, s[0], undefined]);
-	v.forEach((vBuf, vIndex) => {
-		cmd.push([
-			vBuf[Symbol_toPrimitive]?.(STRIX_HTML_IDENTIFIER) === 0
-			? (resolveFrag(vBuf, cmd), 0)
-			: (isPtr(vBuf))
-			? 1
-			: vBuf.constuctor === Object
-			? 2
-			: 3
-		, s[vIndex + 1], vBuf])
-	})
-	return cmd;
-}
-
-const structFrag = ({ s, v }, str = [], val = []) => {
-	str[str.length - 1] += s[0];
-	val.push(v[0])
-	v.forEach((vBuf, vIndex) => {
-		if(vBuf[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
-			structFrag(vBuf, str, val)
-		}
-		str.push(s[vIndex + 1])
-		val.push(vBuf)
-	})
-}
-
-const structTemp = (resolvedFrag, PARSER_UUID) => {
-	let resultBuf;
-	initTasks[PARSER_UUID] = (initTarget) => {
-		initTarget.getAttribute(PARSER_UUID)
-	}
-	resolvedFrag.forEach(([CMD, TEMP_STR, TEMP_VAL], CMD_INDEX) => {
-		tempBuf +=
-			CMD == 0
-			? TEMP_STR
-			: CMD == 1
-			? `<br ${PARSER_UUID}="ptr" ${PTR_PARSER_TOKEN}="${CMD_INDEX}" hidden>${TEMP_VAL.$}<!---->${TEMP_STR}`
-			: CMD == 2
-			? ` ${PARSER_UUID}="attr" ${ATTR_PARSER_TOKEN}-${CMD_INDEX}="${CMD_INDEX}"${TEMP_STR}`
-			: CMD == 3
-			? (TEMP_VAL + '').replace(ESC_REGEX, ESC_FN) + TEMP_STR
-			: ''
-	});
-	return resultBuf;
-}
-
-// ihasq/h ❤ lit-html's textEndRegex
-const attrExt = new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*\\0`, "g");
-const nullExtAll = /\0/g;
-const nullExt = /\0/;
-const escExt = /\\((u\d{4})|(x[A-Fa-f0-9]{2})|(c[A-Za-Z])|([0\^\$\\\.\*\+\?\(\)\[\]\{\}\|\/])|([fnrtv]))/g
-
-const PTR_IDENTIFIER = Symbol();
-
-const df = document.createDocumentFragment();
-
-const fragmentTemp = {
-	then(onloadCallbackFn) {
-		Object_assign(this, { onloadCallbackFn });
-		delete this.then;
-		return this;
 	},
-	[Symbol_toPrimitive](hint) {
-		return hint === PTR_IDENTIFIER
-	},
-	[Symbol.iterator]: function* () {
-		const str = [""], val = [];
-		structFrag(this, str, val);
-		let joined = str.join("\0");
-		let buf;
-		while(joined.includes("-" + (buf = String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))))) {}
-		const attrMatch = joined.matchAll(attrExt).map(({ index }) => index);
-		
-		joined.matchAll(nullExtAll).forEach(({ index }) => {
-			joined = joined.replace(
-				nullExt,
-				attrMatch.includes(index)
-				? ` h-${buf}="${index}" `
+
+	df = document.createDocumentFragment(),
+	tempDiv = document.createElement("div"),
+
+	thisEval = new XPathEvaluator(),
+
+	fragmentTemp = {
+		then(onloadCallbackFn) {
+			Object_assign(this, { onloadCallbackFn });
+			delete this.then;
+			return this;
+		},
+		[Symbol_toPrimitive](hint) {
+			return hint === PTR_IDENTIFIER
+		},
+		[Symbol.iterator]: function* () {
+
+			const
+				str = [""],
+				val = []
+			;
+
+			structFrag(this, str, val);
+
+			console.log(str, val)
+
+			let joined = str.join(""), tokenBuf;
+
+			while(joined.includes(
+				"-" + (tokenBuf = String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))) + "-"
+			));
+
+			joined = str.join(tokenBuf);
+
+			const
+				attrMatch = Array.from(joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*${tokenBuf}`, "g")).map(({ 0: { length }, index }) => index + length)),
+				ptrIndex = [],
+				attrIndex = []
+			;
+			
+			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (_, index, target) => {
+				return attrMatch.includes(index + TOKEN_LENGTH)
+				? (attrIndex.push(index), ` h-${tokenBuf}-h="${index}" `)
 				: "number string".includes(typeof val[index])
-				? val[index]
-				: "<!--" + buf + "-->" + val[index].$ + "<!--" + buf + "-->"
-			)
-		});
-		joined = joined.replaceAll(escExt, () => {
+				? String(val[index]).replaceAll(ESC_REGEX, ESC_FN)
+				: val[index][Symbol_toPrimitive]?.(PTR_IDENTIFIER)
+				? (ptrIndex.push(index), "<!--" + tokenBuf + "-->" + val[index].$ + "<!--" + tokenBuf + "-->")
+				: ""
+			});
 
-		});
-		df.innerHTML = joined;
-		df.childNodes.forEach(childNode => yield childNode);
-	}
-}
+			const ptrMatch = thisEval.evaluate(`//comment()[contains(., '${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+			
+			let node, nodeIndex = 0;
 
-export const h = (s, ...v) => Object_assign({ s, v }, fragmentTemp);
+			while(node = ptrMatch.iterateNext()) {
+				const ptrText = node.nextSibling();
+				ptrMatch[nodeIndex++].watch($ => ptrText.textContent = $);
+			}
 
+			tempDiv.querySelectorAll(`[h-${tokenBuf}-h]`).forEach((attr, index) => {
+				const attrBody = attrIndex[index];
+				console.log(attrBody, val[attrBody])
+				Reflect.ownKeys(val[attrBody]).forEach(attrProp => {
+					if(typeof attrProp !== "symbol") return;
+					const ptr = globalThis[attrProp.description.slice(0, 16)]?.(attrProp);
+					if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
+					ptr.$(attrBody[attr], attr)
+				})
+			});
 
-function Component() {
+			const { childNodes: tempNodes } = tempDiv;
 
-	const count = $(0);
+			for(const tempNode of tempNodes) yield tempNode;
 
-	return html`
-		<button ${{ [on.click]: () => count.$++ }}>
-			I got clicked ${count} times!
-		</button>
-	`
-}
+			return;
+		}
+	},
+	h = (s, ...v) => Object_freeze(Object_assign({ s, v }, fragmentTemp))
+;
 
-[document.body] = html`
-	<body>
-		${Component()}
-	</body>
-`;
+df.appendChild(tempDiv);
 
-// $
+export { h }
