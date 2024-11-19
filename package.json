@@ -1,0 +1,22 @@
+{
+  "name": "libh",
+  "version": "0.0.1",
+  "description": "JavaScript HTML Library",
+  "main": "src/mod.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ihasq/h.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ihasq/h/issues"
+  },
+  "homepage": "https://github.com/ihasq/h#readme"
+}

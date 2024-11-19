@@ -1,9 +1,9 @@
-# h
+# libh
 
 ```javascript
 // Import some stuff
 
-import { $, h as html, on } from "jsr:@ihasq/h"
+import { $, h as html, on } from "libh"
 
 
 // Design your component
@@ -24,4 +24,9 @@ function Component() {
 // Put into the DOM
 
 document.body.append(...Component());
+```
+
+# Install
+```sh
+npm i libh
 ```

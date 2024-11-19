@@ -2,13 +2,13 @@
 
 const
 	{ assign: Object_assign, freeze: Object_freeze } = Object,
-	{ toPrimitive: Symbol_toPrimitive, dispose: Symbol_dispose } = Symbol,
+	{ toPrimitive: Symbol_toPrimitive, dispose: Symbol_dispose, iterator: Symbol_iterator } = Symbol,
 
 	ESC_REGEX = /["&'<>`]/g,
 	ESC_CHARCODE_BUF = {},
 	ESC_FN = (match) => "&#x" + (ESC_CHARCODE_BUF[match] ||= match.charCodeAt(0).toString(16)) + ";",
 
-	TOKEN_LENGTH = 6,
+	TOKEN_LENGTH = 16,
 
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
@@ -45,7 +45,7 @@ const
 		[Symbol_toPrimitive](hint) {
 			return hint === PTR_IDENTIFIER
 		},
-		[Symbol.iterator]: function* () {
+		[Symbol_iterator]: function* () {
 
 			const
 				str = [""],
@@ -58,27 +58,22 @@ const
 
 			let joined = str.join(""), tokenBuf;
 
-			while(joined.includes(
-				"-" + (tokenBuf = String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))) + "-"
-			));
+			while(joined.includes(tokenBuf = String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))));
 
 			joined = str.join(tokenBuf);
 
 			const
 				attrMatch = Array.from(joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*${tokenBuf}`, "g")).map(({ 0: { length }, index }) => index + length)),
 				ptrIndex = [],
-				attrIndex = []
+				attrIndex = [],
+				ptrSelection = []
 			;
 			
-			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (_, index, target) => {
-				return attrMatch.includes(index + TOKEN_LENGTH)
-				? (attrIndex.push(index), ` h-${tokenBuf}-h="${index}" `)
-				: "number string".includes(typeof val[index])
-				? String(val[index]).replaceAll(ESC_REGEX, ESC_FN)
-				: val[index][Symbol_toPrimitive]?.(PTR_IDENTIFIER)
-				? (ptrIndex.push(index), "<!--" + tokenBuf + "-->" + val[index].$ + "<!--" + tokenBuf + "-->")
-				: ""
-			});
+			let ptrCount = -1;
+			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index, target) => (ptrCount++, attrMatch.includes(index + TOKEN_LENGTH)
+				? match
+				: (ptrSelection.push(ptrCount), ptrIndex.push(index), "<!--" + tokenBuf + "-->" + val[index].$ + "<!---->")
+			));
 
 			const ptrMatch = thisEval.evaluate(`//comment()[contains(., '${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 			
@@ -89,7 +84,7 @@ const
 				ptrMatch[nodeIndex++].watch($ => ptrText.textContent = $);
 			}
 
-			tempDiv.querySelectorAll(`[h-${tokenBuf}-h]`).forEach((attr, index) => {
+			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((attr, index) => {
 				const attrBody = attrIndex[index];
 				console.log(attrBody, val[attrBody])
 				Reflect.ownKeys(val[attrBody]).forEach(attrProp => {
