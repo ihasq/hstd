@@ -1,6 +1,6 @@
 {
   "name": "libh",
-  "version": "0.0.1",
+  "version": "0.0.32",
   "description": "JavaScript HTML Library",
   "main": "src/mod.js",
   "directories": {
@@ -11,12 +11,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ihasq/h.git"
+    "url": "git+https://github.com/ihasq/libh.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ihasq/h/issues"
+    "url": "https://github.com/ihasq/libh/issues"
   },
-  "homepage": "https://github.com/ihasq/h#readme"
+  "homepage": "https://github.com/ihasq/libh#readme"
 }
