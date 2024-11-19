@@ -83,12 +83,23 @@ const
 			}
 
 			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((target, index) => {
-				const attrBody = attrIndex[index];
-				Reflect.ownKeys(val[attrBody]).forEach(attrProp => {
+				const attrBody = val[attrIndex[index]];
+				Reflect.ownKeys(attrBody).forEach(attrProp => {
+					const attrValue = attrBody[attrProp];
+					switch(typeof attrProp) {
+						case "symbol": {
+							const ptr = globalThis[attrProp.description.slice(0, 16)]?.(attrProp);
+							if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
+							ptr.$(attrValue, target);
+							return;
+						}
+						case "string": {
+							if(attrProp[0] === ".") {
+								
+							}
+						}
+					}
 					if(typeof attrProp !== "symbol") return;
-					const ptr = globalThis[attrProp.description.slice(0, 16)]?.(attrProp);
-					if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
-					ptr.$(attrBody[target], target)
 				});
 				target.removeAttribute(tokenBuf)
 			});

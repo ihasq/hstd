@@ -37,7 +37,8 @@ const
 	UNDEFINED = undefined,
 	$ = (value, setterFn = setterFnTemp, options) => {
 		const
-			symbol = Symbol(resolverSignature + (options?.name || "")),
+			description = resolverSignature + (options?.name || ""),
+			symbol = Symbol(description),
 			execWatcher = watcherFn => watcherFn(value),
 			afterResolved = resolvedNewValue => {
 				value = resolvedNewValue
@@ -65,7 +66,15 @@ const
 						}
 					},
 					[Symbol_toPrimitive](hint) {
-						return hint === Symbol.for("PTR_IDENTIFIER") ? true : symbol;
+						if(hint === 0x0001) {
+							const symbol = Symbol(description);
+							publishedPtr[symbol] = this;
+							return symbol
+						}
+						return hint === Symbol.for("PTR_IDENTIFIER")
+							? true
+							: symbol
+						;
 					},
 					watch(watcherFn) {
 						watcherFn(value);
