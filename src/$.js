@@ -47,6 +47,13 @@ Object_defineProperty(GLOBALTHIS, resolverSignature, {
 	enumerable: false
 });
 
+/**
+ * 
+ * @param { number | string | any[] } value 
+ * @param { Function } setterFn 
+ * @param { object } options 
+ * @returns { object }
+ */
 export const $ = (value, setterFn = setterFnTemp, options) => {
 	const
 		symbol = Symbol(resolverSignature + (options?.name || "")),

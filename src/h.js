@@ -54,8 +54,6 @@ const
 
 			structFrag(this, str, val);
 
-			console.log(str, val)
-
 			let joined = str.join(""), tokenBuf;
 
 			while(joined.includes(tokenBuf = String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))));
@@ -64,29 +62,28 @@ const
 
 			const
 				attrMatch = Array.from(joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*${tokenBuf}`, "g")).map(({ 0: { length }, index }) => index + length)),
-				ptrIndex = [],
 				attrIndex = [],
-				ptrSelection = []
+				ptrIndex = []
 			;
 			
-			let ptrCount = -1;
-			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index, target) => (ptrCount++, attrMatch.includes(index + TOKEN_LENGTH)
-				? match
-				: (ptrSelection.push(ptrCount), ptrIndex.push(index), "<!--" + tokenBuf + "-->" + val[index].$ + "<!---->")
+			let attrCount = -1;
+			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index, target) => (attrCount++, attrMatch.includes(index + TOKEN_LENGTH)
+				? (attrIndex.push(attrCount), match)
+				: (ptrIndex.push(attrCount), "<!--" + tokenBuf + "-->" + val[index].$ + "<!---->")
 			));
 
 			const ptrMatch = thisEval.evaluate(`//comment()[contains(., '${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
 			
 			let node, nodeIndex = 0;
 
+			let ptrCount = 0
 			while(node = ptrMatch.iterateNext()) {
 				const ptrText = node.nextSibling();
-				ptrMatch[nodeIndex++].watch($ => ptrText.textContent = $);
+				val[ptrIndex[ptrCount++]].watch($ => ptrText.textContent = $);
 			}
 
 			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((attr, index) => {
 				const attrBody = attrIndex[index];
-				console.log(attrBody, val[attrBody])
 				Reflect.ownKeys(val[attrBody]).forEach(attrProp => {
 					if(typeof attrProp !== "symbol") return;
 					const ptr = globalThis[attrProp.description.slice(0, 16)]?.(attrProp);
