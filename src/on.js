@@ -4,10 +4,20 @@ const handlerCache = {};
 const { toPrimitive: Symbol_toPrimitive } = Symbol;
 const bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(event => ref.addEventListener(event, callbacks[event], { passive: true })));
 
+const targetMap = new WeakMap();
+let registeredEvent = "";
+
 export const on = new Proxy({}, {
-	get(_, event) {
-		return event === Symbol_toPrimitive
+	get(_, eventName) {
+		return eventName === Symbol_toPrimitive
 		? bundled[Symbol_toPrimitive](0x0001)
-		: (handlerCache[event] ||= $((callbackFn, ref) => ref.addEventListener(event, callbackFn, { passive: true }), undefined, { name: "on." + event }))[Symbol_toPrimitive](0x0001)
+		: (handlerCache[eventName] ||= $((callbackFn, ref) => {
+			if(!(registeredEvent.includes(eventName))) {
+				globalThis.addEventListener(eventName, e => targetMap.get(e.target)?.[eventName]?.forEach?.(x => x(e)), { passive: true })
+				registeredEvent += eventName + "\0"
+			}
+			if(!targetMap.has(ref)) targetMap.set(ref, {});
+			(targetMap.get(ref)[eventName] ||= []).push(callbackFn)
+		}, undefined, { name: "on." + eventName }))[Symbol_toPrimitive](0x0001)
 	}
 })
