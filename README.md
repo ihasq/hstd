@@ -1,4 +1,4 @@
-# libh
+# [libh](https://libh.js.org)
 
 ```javascript
 // Import some stuff
@@ -26,7 +26,7 @@ function Component() {
 document.body.append(...Component());
 ```
 
-# Install
+## Install
 ```sh
 npm i libh
 ```

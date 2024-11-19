@@ -11,6 +11,7 @@ const
 	TOKEN_LENGTH = 16,
 
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
+	HTML_IDENTIFIER = Symbol.for("HTML_IDENTIFIER"),
 
 	generateToken = () => Math.floor(Math.random() * 26) + 97,
 	generatorTemp = { length: TOKEN_LENGTH },
@@ -18,7 +19,7 @@ const
 	structFrag = ({ s, v }, str = [], val = []) => {
 		str[str.length - 1] += s[0];
 		v.forEach((vBuf, vIndex) => {
-			if(vBuf[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
+			if(vBuf[Symbol_toPrimitive]?.(HTML_IDENTIFIER)) {
 				structFrag(vBuf, str, val)
 				str[str.length - 1] += s[vIndex + 1]
 			} else if("number string".includes(typeof vBuf)) {
@@ -28,7 +29,6 @@ const
 				str.push(s[vIndex + 1])
 			}
 		})
-
 	},
 
 	df = document.createDocumentFragment(),
@@ -43,7 +43,7 @@ const
 			return this;
 		},
 		[Symbol_toPrimitive](hint) {
-			return hint === PTR_IDENTIFIER
+			return hint === HTML_IDENTIFIER
 		},
 		[Symbol_iterator]: function* () {
 
@@ -82,14 +82,15 @@ const
 				val[ptrIndex[ptrCount++]].watch($ => ptrText.textContent = $);
 			}
 
-			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((attr, index) => {
+			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((target, index) => {
 				const attrBody = attrIndex[index];
 				Reflect.ownKeys(val[attrBody]).forEach(attrProp => {
 					if(typeof attrProp !== "symbol") return;
 					const ptr = globalThis[attrProp.description.slice(0, 16)]?.(attrProp);
 					if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
-					ptr.$(attrBody[attr], attr)
-				})
+					ptr.$(attrBody[target], target)
+				});
+				target.removeAttribute(tokenBuf)
 			});
 
 			const { childNodes: tempNodes } = tempDiv;

@@ -34,7 +34,55 @@ const
 		return 0x7f + buf + (buf > 0x8d) + (buf > 0x9c) 
 	},
 	publishedPtr = {},
-	UNDEFINED = undefined
+	UNDEFINED = undefined,
+	$ = (value, setterFn = setterFnTemp, options) => {
+		const
+			symbol = Symbol(resolverSignature + (options?.name || "")),
+			execWatcher = watcherFn => watcherFn(value),
+			afterResolved = resolvedNewValue => {
+				value = resolvedNewValue
+				watchers.forEach(execWatcher)
+			},
+			watchers = [],
+			watcherMap = new WeakMap()
+		;
+		return publishedPtr[symbol] = Object_freeze(Object.assign.apply(
+			null,
+			[
+				{
+					get setter() {
+						return setterFn
+					},
+					get $() {
+						return value
+					},
+					set $(newValue) {
+						newValue = setterFn(newValue);
+						if(newValue instanceof Promise) {
+							newValue.then(afterResolved)
+						} else if(value !== newValue) {
+							watchers.forEach(execWatcher)
+						}
+					},
+					[Symbol_toPrimitive](hint) {
+						return hint === Symbol.for("PTR_IDENTIFIER") ? true : symbol;
+					},
+					watch(watcherFn) {
+						watcherFn(value);
+						watcherMap.set(watcherFn, watchers.push(watcherFn) - 1);
+						return this;
+					},
+					abort(watcherFn) {
+						delete watchers[watcherMap.get(watcherFn) || -1]
+					}
+				},
+				"number string".includes(typeof value) ? PRIM_TEMP : UNDEFINED,
+				typeof value == "number" ? NUM_TEMP : UNDEFINED,
+				Array_isArray(value) ? ARR_TEMP : UNDEFINED,
+				Symbol_dispose ? DISPOSER_TEMP : UNDEFINED,
+			]
+		))
+	}
 ;
 
 let resolverSignature;
@@ -54,51 +102,4 @@ Object_defineProperty(GLOBALTHIS, resolverSignature, {
  * @param { object } options 
  * @returns { object }
  */
-export const $ = (value, setterFn = setterFnTemp, options) => {
-	const
-		symbol = Symbol(resolverSignature + (options?.name || "")),
-		execWatcher = watcherFn => watcherFn(value),
-		afterResolved = resolvedNewValue => {
-			value = resolvedNewValue
-			watchers.forEach(execWatcher)
-		},
-		watchers = [],
-		watcherMap = new WeakMap()
-	;
-	return publishedPtr[symbol] = Object_freeze(Object.assign.apply(
-		null,
-		[
-			{
-				get setter() {
-					return setterFn
-				},
-				get $() {
-					return value
-				},
-				set $(newValue) {
-					newValue = setterFn(newValue);
-					if(newValue instanceof Promise) {
-						newValue.then(afterResolved)
-					} else if(value !== newValue) {
-						watchers.forEach(execWatcher)
-					}
-				},
-				[Symbol_toPrimitive](hint) {
-					return hint === Symbol.for("PTR_IDENTIFIER") ? true : symbol;
-				},
-				watch(watcherFn) {
-					watcherFn(value);
-					watcherMap.set(watcherFn, watchers.push(watcherFn) - 1);
-					return this;
-				},
-				abort(watcherFn) {
-					delete watchers[watcherMap.get(watcherFn) || -1]
-				}
-			},
-			"number string".includes(typeof value) ? PRIM_TEMP : UNDEFINED,
-			typeof value == "number" ? NUM_TEMP : UNDEFINED,
-			Array_isArray(value) ? ARR_TEMP : UNDEFINED,
-			Symbol_dispose ? DISPOSER_TEMP : UNDEFINED,
-		]
-	))
-};
+export { $ };

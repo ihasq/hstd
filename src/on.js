@@ -1,4 +1,4 @@
-import { $ } from "$.js"
+import { $ } from "./$.js"
 
 const handlerCache = {};
 const { toPrimitive: Symbol_toPrimitive } = Symbol;
@@ -7,7 +7,7 @@ const bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(event => re
 export const on = new Proxy({}, {
 	get(_, event) {
 		return event === Symbol_toPrimitive
-		? bundled
-		: handlerCache[event] ||= $((callbackFn, ref) => ref.addEventListener(event, callbackFn, { passive: true }))
+		? bundled[Symbol_toPrimitive]()
+		: handlerCache[event] ||= $((callbackFn, ref) => ref.addEventListener(event, callbackFn, { passive: true }))[Symbol_toPrimitive]()
 	}
 })
