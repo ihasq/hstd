@@ -36,6 +36,8 @@ const
 
 	thisEval = new XPathEvaluator(),
 
+	resolvedTSAMap = new WeakMap(),
+
 	fragmentTemp = {
 		then(onloadCallbackFn) {
 			Object_assign(this, { onloadCallbackFn });
@@ -69,17 +71,16 @@ const
 			let attrCount = -1;
 			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index, target) => (attrCount++, attrMatch.includes(index + TOKEN_LENGTH)
 				? (attrIndex.push(attrCount), match)
-				: (ptrIndex.push(attrCount), "<!--" + tokenBuf + "-->" + val[index].$ + "<!---->")
+				: (ptrIndex.push(attrCount), "<!--" + tokenBuf + "-->" + tokenBuf + "<!---->")
 			));
 
-			const ptrMatch = thisEval.evaluate(`//comment()[contains(., '${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
-			
-			let node, nodeIndex = 0;
+			const ptrMatch = thisEval.evaluate(`//comment()[contains(., '${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
-			let ptrCount = 0
-			while(node = ptrMatch.iterateNext()) {
-				const ptrText = node.nextSibling();
-				val[ptrIndex[ptrCount++]].watch($ => ptrText.textContent = $);
+			for(let i = 0; i < ptrIndex.length; i++) {
+				const comment = ptrMatch.snapshotItem(i);
+				comment.textContent = "";
+				const ptrText = comment.nextSibling;
+				val[ptrIndex[i]].watch($ => ptrText.textContent = $);
 			}
 
 			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((target, index) => {
@@ -104,9 +105,7 @@ const
 				target.removeAttribute(tokenBuf)
 			});
 
-			const { childNodes: tempNodes } = tempDiv;
-
-			for(const tempNode of tempNodes) yield tempNode;
+			for(const tempNode of tempDiv.childNodes) yield tempNode;
 
 			return;
 		}

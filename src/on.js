@@ -9,7 +9,7 @@ let registeredEvent = "";
 
 export const on = new Proxy({}, {
 	get(_, eventName) {
-		return eventName === Symbol_toPrimitive
+		return eventName === Symbol_toPrimitive || eventName === "$"
 		? bundled[Symbol_toPrimitive](0x0001)
 		: (handlerCache[eventName] ||= $((callbackFn, ref) => {
 			if(!(registeredEvent.includes(eventName))) {

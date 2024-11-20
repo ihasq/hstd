@@ -6,6 +6,7 @@ const
 		globalThis: GLOBALTHIS
 	} = globalThis,
 	RAF = GLOBALTHIS.requestAnimationFrame,
+	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 	DISPOSER_TEMP = {
 		[Symbol_dispose]() {
 
@@ -62,6 +63,7 @@ const
 						if(newValue instanceof Promise) {
 							newValue.then(afterResolved)
 						} else if(value !== newValue) {
+							value = newValue;
 							watchers.forEach(execWatcher)
 						}
 					},
@@ -71,10 +73,7 @@ const
 							publishedPtr[symbol] = this;
 							return symbol
 						}
-						return hint === Symbol.for("PTR_IDENTIFIER")
-							? true
-							: symbol
-						;
+						return hint === PTR_IDENTIFIER;
 					},
 					watch(watcherFn) {
 						watcherFn(value);
