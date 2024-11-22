@@ -1,5 +1,4 @@
 import { Symbol_toPrimitive, UNDEFINED } from "./const.js";
-import { createToken } from "./core/token.js";
 
 const
 	{

@@ -12,6 +12,7 @@ const
 
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 	HTML_IDENTIFIER = Symbol.for("HTML_IDENTIFIER"),
+
 	createToken = function*() {
 		for(let i = 0; i < TOKEN_LENGTH; i++) {
 			yield Math.floor(Math.random() * 26) + 97
@@ -69,12 +70,12 @@ const
 			;
 			
 			let attrCount = -1;
-			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index, target) => (attrCount++, attrMatch.includes(index + TOKEN_LENGTH)
+			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index) => (attrCount++, attrMatch.includes(index + TOKEN_LENGTH)
 				? (attrIndex.push(attrCount), match)
 				: (ptrIndex.push(attrCount), "<!--" + tokenBuf + "-->" + tokenBuf + "<!---->")
 			));
 
-			const ptrMatch = thisEval.evaluate(`//comment()[contains(., '${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+			const ptrMatch = thisEval.evaluate(`//comment()[contains(.,'${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 
 			for(let i = 0; i < ptrIndex.length; i++) {
 				const comment = ptrMatch.snapshotItem(i);
@@ -86,30 +87,29 @@ const
 			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((ref, index) => {
 				const attrBody = val[attrIndex[index]];
 				Reflect.ownKeys(attrBody).forEach(attrProp => {
-					const attrValue = attrBody[attrProp];
-					switch(typeof attrProp) {
-						case "symbol": {
-							const ptr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
-							if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
-							ptr.$(attrValue, ref);
-							break;
-						}
-						case "string": {
-							if(attrValue[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
-								if(attrProp === "value" && ref instanceof HTMLInputElement) {
-									const oninput = $ => ref.value = $;
-									attrValue.watch(oninput);
-									ref.addEventListener("input", ({ target: { value } }) => setTimeout(() => {
-										attrValue.ignore.set(oninput);
-										attrValue.$ = value
-										attrValue.ignore.delete(oninput);
-									}), { passive: true })
-								} else {
-									attrValue.watch($ => ref[attrProp] = $)
-								}
+					const
+						attrValue = attrBody[attrProp],
+						attrPropType = typeof attrProp
+					;
+					if(attrPropType === "symbol") {
+						const ptr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
+						if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
+						ptr.$(attrValue, ref);
+					} else if(attrPropType === "string") {
+						if(attrValue[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
+							if(attrProp === "value" && ref instanceof HTMLInputElement) {
+								const oninput = $ => ref.value = $;
+								attrValue.watch(oninput);
+								ref.addEventListener("input", ({ target: { value } }) => setTimeout(() => {
+									attrValue.ignore.set(oninput);
+									attrValue.$ = value
+									attrValue.ignore.delete(oninput);
+								}), { passive: true })
 							} else {
-								ref[attrProp] = attrValue;
+								attrValue.watch($ => ref[attrProp] = $)
 							}
+						} else {
+							ref[attrProp] = attrValue;
 						}
 					}
 				});

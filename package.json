@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/ihasq/libh/issues"
   },
-  "homepage": "https://github.com/ihasq/libh#readme"
+  "homepage": "https://github.com/ihasq/libh#readme",
+  "devDependencies": {
+    "rollup-plugin-html-literals": "^1.1.8"
+  }
 }
