@@ -21,8 +21,7 @@ function Component() {
 }
 
 
-// Put into the DOM[
-]
+// Put into the DOM
 
 document.body.append(...Component());
 ```
