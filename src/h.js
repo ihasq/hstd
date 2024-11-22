@@ -1,8 +1,8 @@
 // ihasq/h ❤ lit-html's textEndRegex
 
+import { Symbol_toPrimitive } from "./const.js";
+
 const
-	{ assign: Object_assign, freeze: Object_freeze } = Object,
-	{ toPrimitive: Symbol_toPrimitive, dispose: Symbol_dispose, iterator: Symbol_iterator } = Symbol,
 
 	ESC_REGEX = /["&'<>`]/g,
 	ESC_CHARCODE_BUF = {},
@@ -12,9 +12,11 @@ const
 
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 	HTML_IDENTIFIER = Symbol.for("HTML_IDENTIFIER"),
-
-	generateToken = () => Math.floor(Math.random() * 26) + 97,
-	generatorTemp = { length: TOKEN_LENGTH },
+	createToken = function*() {
+		for(let i = 0; i < TOKEN_LENGTH; i++) {
+			yield Math.floor(Math.random() * 26) + 97
+		}
+	},
 
 	structFrag = ({ s, v }, str = [], val = []) => {
 		str[str.length - 1] += s[0];
@@ -36,18 +38,16 @@ const
 
 	thisEval = new XPathEvaluator(),
 
-	resolvedTSAMap = new WeakMap(),
-
 	fragmentTemp = {
 		then(onloadCallbackFn) {
-			Object_assign(this, { onloadCallbackFn });
+			Object.assign(this, { onloadCallbackFn });
 			delete this.then;
 			return this;
 		},
 		[Symbol_toPrimitive](hint) {
 			return hint === HTML_IDENTIFIER
 		},
-		[Symbol_iterator]: function* () {
+		[Symbol.iterator]: function* () {
 
 			const
 				str = [""],
@@ -58,7 +58,7 @@ const
 
 			let joined = str.join(""), tokenBuf;
 
-			while(joined.includes(tokenBuf = String.fromCharCode.apply(null, Array.from(generatorTemp, generateToken))));
+			while(joined.includes(tokenBuf = String.fromCharCode(...createToken()))) {};
 
 			joined = str.join(tokenBuf);
 
@@ -83,26 +83,37 @@ const
 				val[ptrIndex[i]].watch($ => ptrText.textContent = $);
 			}
 
-			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((target, index) => {
+			tempDiv.querySelectorAll(`[${tokenBuf}]`).forEach((ref, index) => {
 				const attrBody = val[attrIndex[index]];
 				Reflect.ownKeys(attrBody).forEach(attrProp => {
 					const attrValue = attrBody[attrProp];
 					switch(typeof attrProp) {
 						case "symbol": {
-							const ptr = globalThis[attrProp.description.slice(0, 16)]?.(attrProp);
+							const ptr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
 							if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
-							ptr.$(attrValue, target);
-							return;
+							ptr.$(attrValue, ref);
+							break;
 						}
 						case "string": {
-							if(attrProp[0] === ".") {
-								
+							if(attrValue[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
+								if(attrProp === "value" && ref instanceof HTMLInputElement) {
+									const oninput = $ => ref.value = $;
+									attrValue.watch(oninput);
+									ref.addEventListener("input", ({ target: { value } }) => setTimeout(() => {
+										attrValue.ignore.set(oninput);
+										attrValue.$ = value
+										attrValue.ignore.delete(oninput);
+									}), { passive: true })
+								} else {
+									attrValue.watch($ => ref[attrProp] = $)
+								}
+							} else {
+								ref[attrProp] = attrValue;
 							}
 						}
 					}
-					if(typeof attrProp !== "symbol") return;
 				});
-				target.removeAttribute(tokenBuf)
+				ref.removeAttribute(tokenBuf)
 			});
 
 			for(const tempNode of tempDiv.childNodes) yield tempNode;
@@ -110,9 +121,12 @@ const
 			return;
 		}
 	},
-	h = (s, ...v) => Object_freeze(Object_assign({ s, v }, fragmentTemp))
+	h = (s, ...v) => Object.freeze(Object.assign({ s, v }, fragmentTemp))
 ;
 
 df.appendChild(tempDiv);
 
+/**
+ * 
+ */
 export { h }

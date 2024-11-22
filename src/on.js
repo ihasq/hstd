@@ -1,7 +1,10 @@
 import { $ } from "./$.js"
+import { Symbol_toPrimitive } from "./const.js";
 
 const handlerCache = {};
-const { toPrimitive: Symbol_toPrimitive } = Symbol;
+const registerListenerToMap = (callbackFn, ref) => {
+
+}
 const bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(event => ref.addEventListener(event, callbacks[event], { passive: true })));
 
 const targetMap = new WeakMap();

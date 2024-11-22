@@ -1,8 +1,11 @@
+import { Symbol_toPrimitive, UNDEFINED } from "./const.js";
+import { createToken } from "./core/token.js";
+
 const
 	{
 		Array: { from: Array_from, isArray: Array_isArray },
 		Object: { assign: Object_assign, defineProperty: Object_defineProperty, freeze: Object_freeze },
-		Symbol: { dispose: Symbol_dispose, toPrimitive: Symbol_toPrimitive },
+		Symbol: { dispose: Symbol_dispose },
 		globalThis: GLOBALTHIS
 	} = globalThis,
 	RAF = GLOBALTHIS.requestAnimationFrame,
@@ -29,24 +32,26 @@ const
 
 	},
 	setterFnTemp = $ => $,
-	resolverSignatureGenObj = { length: 16 },
-	resolverSignatureGenCB = () => {
-		let buf = Math.floor(Math.random() * 31)
-		return 0x7f + buf + (buf > 0x8d) + (buf > 0x9c) 
+	resolverSignatureGenCB = function*(length = 52) {
+		let buf;
+		for(let i = 0; i < length; i++) {
+			buf = Math.floor(Math.random() * 31)
+			yield 0x7f + buf + (buf > 0x8d) + (buf > 0x9c)
+		}
 	},
 	publishedPtr = {},
-	UNDEFINED = undefined,
 	$ = (value, setterFn = setterFnTemp, options) => {
 		const
 			description = resolverSignature + (options?.name || ""),
 			symbol = Symbol(description),
-			execWatcher = watcherFn => watcherFn(value),
+			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
 			afterResolved = resolvedNewValue => {
 				value = resolvedNewValue
 				watchers.forEach(execWatcher)
 			},
 			watchers = [],
-			watcherMap = new WeakMap()
+			watcherMap = new WeakMap(),
+			watcherIgnoreList = new WeakMap()
 		;
 		return publishedPtr[symbol] = Object_freeze(Object.assign.apply(
 			null,
@@ -80,6 +85,14 @@ const
 						watcherMap.set(watcherFn, watchers.push(watcherFn) - 1);
 						return this;
 					},
+					ignore: {
+						set(watcherFn) {
+							watcherIgnoreList.set(watcherFn, true);
+						},
+						delete(watcherFn) {
+							watcherIgnoreList.set(watcherFn, false);
+						},
+					},
 					abort(watcherFn) {
 						delete watchers[watcherMap.get(watcherFn) || -1]
 					}
@@ -95,9 +108,11 @@ const
 
 let resolverSignature;
 
-while((resolverSignature = String.fromCharCode.apply(null, Array_from(resolverSignatureGenObj, resolverSignatureGenCB))) in GLOBALTHIS) {};
+console.log(String.fromCharCode(...resolverSignatureGenCB(16)))
 
-Object_defineProperty(GLOBALTHIS, resolverSignature, {
+while((resolverSignature = String.fromCharCode(...resolverSignatureGenCB())) in globalThis) {};
+
+Object_defineProperty(globalThis, resolverSignature, {
 	value: (symbol) => publishedPtr[symbol],
 	configurable: false,
 	enumerable: false
