@@ -107,8 +107,6 @@ const
 
 let resolverSignature;
 
-console.log(String.fromCharCode(...resolverSignatureGenCB(16)))
-
 while((resolverSignature = String.fromCharCode(...resolverSignatureGenCB())) in globalThis) {};
 
 Object_defineProperty(globalThis, resolverSignature, {
