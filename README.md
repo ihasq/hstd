@@ -24,10 +24,9 @@ function Component() {
 // Put into the DOM
 
 document.body.append(...Component());
-
-
-// See live demo at https://ihasq.com/libh/demo/count 
 ```
+
+Visit live [demo](https://ihasq.com/libh/demo/count).
 
 ## Install
 ```sh
