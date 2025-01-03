@@ -1,6 +1,6 @@
 # 🐛 lib[h](https://libh.js.org)
-![NPM Version](https://img.shields.io/npm/v/libh)
-![npm bundle size](https://img.shields.io/bundlephobia/minzip/libh)
+[![NPM Version](https://img.shields.io/npm/v/libh)](https://www.npmjs.com/package/libh)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/libh)](https://bundlephobia.com/package/libh)
 
 ```javascript
 // get ingredients
