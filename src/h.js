@@ -6,7 +6,7 @@ const
 
 	ESC_REGEX = /["&'<>`]/g,
 	ESC_CHARCODE_BUF = {},
-	ESC_FN = (match) => "&#x" + (ESC_CHARCODE_BUF[match] ||= match.charCodeAt(0).toString(16)) + ";",
+	ESC_FN = (match) => `&#x${ESC_CHARCODE_BUF[match] ||= match.charCodeAt(0).toString(16)};`,
 
 	TOKEN_LENGTH = 16,
 
@@ -72,7 +72,7 @@ const
 			let attrCount = -1;
 			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index) => (attrCount++, attrMatch.includes(index + TOKEN_LENGTH)
 				? (attrIndex.push(attrCount), match)
-				: (ptrIndex.push(attrCount), "<!--" + tokenBuf + "-->" + tokenBuf + "<!---->")
+				: (ptrIndex.push(attrCount), `<!--${tokenBuf}-->${tokenBuf}<!---->`)
 			));
 
 			const ptrMatch = thisEval.evaluate(`//comment()[contains(.,'${tokenBuf}')]`, tempDiv, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
