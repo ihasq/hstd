@@ -32,3 +32,44 @@ Visit live [demo](https://ihasq.com/libh/demo/count).
 ```sh
 npm i libh
 ```
+
+## Example
+
+### Class-model
+```javascript
+import { $, h as html, on, css } from "libh"
+
+const ButtonClass = {
+    [css]: {
+        color: "white",
+        backgroundColor: "blue",
+    },
+    [on.click]: () => alert("hi")
+}
+
+function Main() {
+
+    const count = $(0);
+
+    return html`
+        <button ${{ [on.click]: () => count.$++, ...ButtonClass }}>
+            I'm styled ${count}!
+        </button>
+    `
+}
+```
+
+### Bidirecetional binding
+```javascript
+function Linked() {
+
+    const valueHolder = $(0)
+
+    return html`
+        <h1>these are linked!</h1>
+        <input ${{ value: valueHolder, type: "range" }}>
+        <input ${{ value: valueHolder, type: "range" }}>
+        <label>value is ${valueHolder}</label>
+    `
+}
+```
