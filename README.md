@@ -1,4 +1,4 @@
-# ⚙ lib[h](https://libh.js.org)
+# 🐛 lib[h](https://libh.js.org)
 
 ```javascript
 // Import some stuff
