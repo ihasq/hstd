@@ -24,7 +24,7 @@ const
 	NUM_TEMP = {
 		to(destination, duration, curve) {
 			if(!RAF) return this;
-
+			
 		}
 	},
 	ARR_TEMP = {

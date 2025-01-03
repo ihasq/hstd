@@ -1,12 +1,12 @@
 # 🐛 lib[h](https://libh.js.org)
 
 ```javascript
-// Import some stuff
+// import some shitlets
 
 import { $, h as html, on } from "libh"
 
 
-// Design your component
+// cook yours
 
 function Component() {
 
@@ -21,7 +21,7 @@ function Component() {
 }
 
 
-// Put into the DOM
+// throw into the DOM
 
 document.body.append(...Component());
 ```
