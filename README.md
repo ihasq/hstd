@@ -1,7 +1,7 @@
 # 🐛 lib[h](https://libh.js.org)
 
 ```javascript
-// import some shitlets
+// get ingredients
 
 import { $, h as html, on } from "libh"
 
