@@ -30,7 +30,7 @@ const
 		 * @param { any } a 
 		 * @param { any } b 
 		 */
-		swapBy(a, b) {
+		swapOf(a, b) {
 			return this.swap(this.indexOf(a), this.indexOf(b))
 		},
 	},
