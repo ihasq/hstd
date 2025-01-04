@@ -9,26 +9,38 @@ const
 	} = globalThis,
 	RAF = GLOBALTHIS.requestAnimationFrame,
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
-	DISPOSER_TEMP = {
-		[Symbol_dispose]() {
-
-		}
-	},
-	PRIM_TEMP = {
-		into(transformerFn) {
-			const ptr = $(undefined);
-			this.watch($ => ptr.$ = $);
-			return ptr;
-		}
-	},
-	NUM_TEMP = {
-		to(destination, duration, curve) {
-			if(!RAF) return this;
+	// NUM_TEMP = {
+	// 	to(destination, duration, curve) {
+	// 		if(!RAF) return this;
 			
-		}
-	},
+	// 	}
+	// },
 	ARR_TEMP = {
+		/**
+		 * 
+		 * @param { number } a 
+		 * @param { number } b 
+		 */
+		swap(a, b) {
+			let buf = this[a];
+			this[a] = this[b];
+			this[b] = buf;
+			return this;
+		},
 
+		/**
+		 * 
+		 * @param { any } a 
+		 * @param { any } b 
+		 */
+		swapBy(a, b) {
+			return this.swap(this.indexOf(a), this.indexOf(b))
+		},
+	},
+	into = function(transformerFn) {
+		const ptr = $(UNDEFINED);
+		this.watch($ => ptr.$ = $);
+		return ptr;
 	},
 	setterFnTemp = $ => $,
 	resolverSignatureGenCB = function*(length = 52) {
@@ -43,7 +55,7 @@ const
 		const
 			description = resolverSignature + (options?.name || ""),
 			symbol = Symbol(description),
-			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
+			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? UNDEFINED : watcherFn(value),
 			afterResolved = resolvedNewValue => {
 				value = resolvedNewValue
 				watchers.forEach(execWatcher)
@@ -52,25 +64,14 @@ const
 			watcherMap = new WeakMap(),
 			watcherIgnoreList = new WeakMap()
 		;
-		return publishedPtr[symbol] = Object_freeze(Object.assign.apply(
-			null,
-			[
+
+		return publishedPtr[symbol] = Array_isArray(value)
+			? Object_assign(
+				value,
+				ARR_TEMP
+			)
+			: Object_freeze(Object_assign(
 				{
-					get setter() {
-						return setterFn
-					},
-					get $() {
-						return value
-					},
-					set $(newValue) {
-						newValue = setterFn(newValue);
-						if(newValue instanceof Promise) {
-							newValue.then(afterResolved)
-						} else if(value !== newValue) {
-							value = newValue;
-							watchers.forEach(execWatcher)
-						}
-					},
 					[Symbol_toPrimitive](hint) {
 						if(hint === 0x0001) {
 							const symbol = Symbol(description);
@@ -94,14 +95,30 @@ const
 					},
 					abort(watcherFn) {
 						delete watchers[watcherMap.get(watcherFn) || -1]
-					}
+					},
+					get setter() {
+						return setterFn
+					},
+					get $() {
+						return value
+					},
+					set $(newValue) {
+						newValue = setterFn(newValue);
+						if(newValue instanceof Promise) {
+							newValue.then(afterResolved)
+						} else if(value !== newValue) {
+							value = newValue;
+							watchers.forEach(execWatcher)
+						}
+					},
+	
+					into
 				},
-				"number string".includes(typeof value) ? PRIM_TEMP : UNDEFINED,
-				typeof value == "number" ? NUM_TEMP : UNDEFINED,
-				Array_isArray(value) ? ARR_TEMP : UNDEFINED,
-				Symbol_dispose ? DISPOSER_TEMP : UNDEFINED,
-			]
-		))
+				// "number string".includes(typeof value) ? {
+
+				// } : UNDEFINED,
+				// typeof value == "number" ? NUM_TEMP : UNDEFINED,
+			))
 	}
 ;
 

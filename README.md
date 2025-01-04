@@ -1,6 +1,7 @@
 # 🐛 lib[h](https://libh.js.org)
 [![NPM Version](https://img.shields.io/npm/v/libh)](https://www.npmjs.com/package/libh)
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/libh)](https://bundlephobia.com/package/libh)
+https://stackblitz.com/edit/vitejs-vite-vcga6uwx?file=main.js
 
 ```javascript
 // get ingredients
