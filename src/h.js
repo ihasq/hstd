@@ -1,7 +1,5 @@
 // ihasq/h ❤ lit-html's textEndRegex
 
-import { Symbol_toPrimitive } from "./const.js";
-
 const
 
 	ESC_REGEX = /["&'<>`]/g,
@@ -22,7 +20,7 @@ const
 	structFrag = ({ s, v }, str = [], val = []) => {
 		str[str.length - 1] += s[0];
 		v.forEach((vBuf, vIndex) => {
-			if(vBuf[Symbol_toPrimitive]?.(HTML_IDENTIFIER)) {
+			if(vBuf[Symbol.toPrimitive]?.(HTML_IDENTIFIER)) {
 				structFrag(vBuf, str, val)
 				str[str.length - 1] += s[vIndex + 1]
 			} else if("number string".includes(typeof vBuf)) {
@@ -45,7 +43,7 @@ const
 			delete this.then;
 			return this;
 		},
-		[Symbol_toPrimitive](hint) {
+		[Symbol.toPrimitive](hint) {
 			return hint === HTML_IDENTIFIER
 		},
 		[Symbol.iterator]: function* () {
@@ -93,10 +91,10 @@ const
 					;
 					if(attrPropType === "symbol") {
 						const ptr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
-						if(!ptr?.[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) return;
+						if(!ptr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) return;
 						ptr.$(attrValue, ref);
 					} else if(attrPropType === "string") {
-						if(attrValue[Symbol_toPrimitive]?.(PTR_IDENTIFIER)) {
+						if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
 							if(attrProp === "value" && ref instanceof HTMLInputElement) {
 								const oninput = $ => ref.value = $;
 								attrValue.watch(oninput);

@@ -1,5 +1,4 @@
 import { $ } from "./$.js"
-import { Symbol_toPrimitive } from "./const.js";
 
 let registeredEvent = "";
 
@@ -9,8 +8,8 @@ const
 	targetMap = new WeakMap(),
 	on = new Proxy({}, {
 		get(_, eventName) {
-			return eventName === Symbol_toPrimitive || eventName === "$"
-			? bundled[Symbol_toPrimitive](0x0001)
+			return eventName === Symbol.toPrimitive || eventName === "$"
+			? bundled[Symbol.toPrimitive](0x0001)
 			: (handlerCache[eventName] ||= $((callbackFn, ref) => {
 				if(!(registeredEvent.includes(eventName))) {
 					globalThis.addEventListener(eventName, e => targetMap.get(e.target)?.[eventName]?.forEach?.(x => x(e)), { passive: true })
@@ -18,7 +17,7 @@ const
 				}
 				if(!targetMap.has(ref)) targetMap.set(ref, {});
 				(targetMap.get(ref)[eventName] ||= []).push(callbackFn)
-			}, undefined, { name: "on." + eventName }))[Symbol_toPrimitive](0x0001)
+			}, undefined, { name: "on." + eventName }))[Symbol.toPrimitive](0x0001)
 		}
 	})
 ;

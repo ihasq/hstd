@@ -1,5 +1,4 @@
 import { $ } from "./$.js"
-import { Symbol_toPrimitive } from "./const.js";
 
 const
 
@@ -18,20 +17,20 @@ const
 		value[styleProp]
 	))),
 
-	getBundled = () => bundledProp[Symbol_toPrimitive](0x0001),
+	getBundled = () => bundledProp[Symbol.toPrimitive](0x0001),
 
 	css = new Proxy({}, {
 		get(_, styleProp) {
-			return styleProp === Symbol_toPrimitive
+			return styleProp === Symbol.toPrimitive
 			? getBundled
 			: styleProp === "$"
-			? bundledProp[Symbol_toPrimitive](0x0001)
+			? bundledProp[Symbol.toPrimitive](0x0001)
 			: (styleCache[styleProp] ||= $((value, ref) => {
 				ref.attributeStyleMap.set(
 					formStyleProp(styleProp),
 					value
 				)
-			}))[Symbol_toPrimitive](0x0001)
+			}))[Symbol.toPrimitive](0x0001)
 		}
 	})
 ;

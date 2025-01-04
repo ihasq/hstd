@@ -1,10 +1,7 @@
-import { Symbol_toPrimitive, UNDEFINED } from "./const.js";
-
 const
 	{
-		Array: { from: Array_from, isArray: Array_isArray },
+		Array: { isArray: Array_isArray },
 		Object: { assign: Object_assign, defineProperty: Object_defineProperty, freeze: Object_freeze },
-		Symbol: { dispose: Symbol_dispose },
 		globalThis: GLOBALTHIS
 	} = globalThis,
 	RAF = GLOBALTHIS.requestAnimationFrame,
@@ -38,7 +35,7 @@ const
 		},
 	},
 	into = function(transformerFn) {
-		const ptr = $(UNDEFINED);
+		const ptr = $(undefined);
 		this.watch($ => ptr.$ = $);
 		return ptr;
 	},
@@ -55,7 +52,7 @@ const
 		const
 			description = resolverSignature + (options?.name || ""),
 			symbol = Symbol(description),
-			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? UNDEFINED : watcherFn(value),
+			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
 			afterResolved = resolvedNewValue => {
 				value = resolvedNewValue
 				watchers.forEach(execWatcher)
@@ -72,7 +69,7 @@ const
 			)
 			: Object_freeze(Object_assign(
 				{
-					[Symbol_toPrimitive](hint) {
+					[Symbol.toPrimitive](hint) {
 						if(hint === 0x0001) {
 							const symbol = Symbol(description);
 							publishedPtr[symbol] = this;
@@ -116,8 +113,8 @@ const
 				},
 				// "number string".includes(typeof value) ? {
 
-				// } : UNDEFINED,
-				// typeof value == "number" ? NUM_TEMP : UNDEFINED,
+				// } : undefined,
+				// typeof value == "number" ? NUM_TEMP : undefined,
 			))
 	}
 ;
