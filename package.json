@@ -1,7 +1,7 @@
 {
   "name": "libh",
-  "version": "0.0.36",
-  "description": "JavaScript HTML Library",
+  "version": "0.0.37",
+  "description": "blazingly fast vdom alternative ahh javascript",
   "main": "src/mod.js",
   "directories": {
     "test": "test"
