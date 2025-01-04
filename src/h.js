@@ -38,9 +38,11 @@ const
 	thisEval = new XPathEvaluator(),
 
 	fragmentTemp = {
+		onloadCallbackFn: [],
 		then(onloadCallbackFn) {
-			Object.assign(this, { onloadCallbackFn });
-			delete this.then;
+			if(!this.onloadCallbackFn.length) {
+				this.onloadCallbackFn[0] = onloadCallbackFn;
+			}
 			return this;
 		},
 		[Symbol.toPrimitive](hint) {
@@ -55,7 +57,7 @@ const
 
 			structFrag(this, str, val);
 
-			let joined = str.join(""), tokenBuf;
+			let joined = str.join(""), tokenBuf, hasId = false;
 
 			while(joined.includes(tokenBuf = String.fromCharCode(...createToken()))) {};
 
@@ -64,7 +66,8 @@ const
 			const
 				attrMatch = Array.from(joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*${tokenBuf}`, "g")).map(({ 0: { length }, index }) => index + length)),
 				attrIndex = [],
-				ptrIndex = []
+				ptrIndex = [],
+				idList = {}
 			;
 			
 			let attrCount = -1;
@@ -106,6 +109,8 @@ const
 							} else {
 								attrValue.watch($ => ref[attrProp] = $)
 							}
+						} else if(attrProp === "id") {
+							idList[attrValue] = ref;
 						} else {
 							ref[attrProp] = attrValue;
 						}
@@ -115,6 +120,8 @@ const
 			});
 
 			for(const tempNode of tempDiv.childNodes) yield tempNode;
+
+			this.onloadCallbackFn[0]?.(idList)
 
 			return;
 		}
