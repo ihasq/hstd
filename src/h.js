@@ -109,7 +109,7 @@ const
 							} else {
 								attrValue.watch($ => ref[attrProp] = $)
 							}
-						} else if(attrProp === "id") {
+						} else if(attrProp === "id" && !(attrValue in idList)) {
 							idList[attrValue] = ref;
 						} else {
 							ref[attrProp] = attrValue;

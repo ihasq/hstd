@@ -75,3 +75,23 @@ function Linked() {
     `
 }
 ```
+
+### Post-processing
+```javascript
+function Canvas() {
+
+    const colorSwitch = $(true);
+
+    return html`
+        <canvas ${{ id: "color", [on.click]: () => colorSwitch.switch() }}></canvas>
+
+    `.then(({ color }) => {
+
+        const ctx = color.getContext("2d");
+        colorSwitch.into($ => $ ? "red" : "blue").watch($ => {
+            ctx.fillStyle = $;
+            ctx.fillRect(0, 0, 100, 100);
+        });
+    })
+}
+```

@@ -70,12 +70,12 @@ const
 			: Object_freeze(Object_assign(
 				{
 					[Symbol.toPrimitive](hint) {
-						if(hint === 0x0001) {
-							const symbol = Symbol(description);
-							publishedPtr[symbol] = this;
-							return symbol
-						}
 						return hint === PTR_IDENTIFIER;
+					},
+					publish() {
+						const symbol = Symbol(description);
+						publishedPtr[symbol] = this;
+						return symbol
 					},
 					watch(watcherFn) {
 						watcherFn(value);

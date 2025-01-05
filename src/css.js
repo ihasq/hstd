@@ -17,20 +17,20 @@ const
 		value[styleProp]
 	))),
 
-	getBundled = () => bundledProp[Symbol.toPrimitive](0x0001),
+	getBundled = () => bundledProp.publish(),
 
 	css = new Proxy({}, {
 		get(_, styleProp) {
 			return styleProp === Symbol.toPrimitive
 			? getBundled
 			: styleProp === "$"
-			? bundledProp[Symbol.toPrimitive](0x0001)
+			? bundledProp.publish()
 			: (styleCache[styleProp] ||= $((value, ref) => {
 				ref.attributeStyleMap.set(
 					formStyleProp(styleProp),
 					value
 				)
-			}))[Symbol.toPrimitive](0x0001)
+			})).publish()
 		}
 	})
 ;
