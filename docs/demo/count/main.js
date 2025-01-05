@@ -1,4 +1,4 @@
-import { $, h as html, on } from "../../libh.min.js";
+import { $, h as html, on } from "libh";
 
 
 function Component() {
