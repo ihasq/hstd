@@ -102,3 +102,26 @@ function Canvas() {
     })
 }
 ```
+
+### Draggable List
+```javascript
+function Canvas() {
+
+    const customers = $([]);
+
+    const name = $(""), email = $("");
+
+    return html`
+        <ul>${customers}</ul>
+        <input ${{ value: name, type: "string" }}>
+        <input ${{ value: email, type: "email" }}>
+
+        <button ${{ [on.click]: () => {
+            customers.push(html`<li>name: ${name.$}, email: ${email.$}</li> `);
+
+            name.$ = "";
+            email.$ = "";
+        } }}>submit</button>
+    `
+}
+```
