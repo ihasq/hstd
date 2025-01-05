@@ -34,7 +34,12 @@ const
 			return this.swap(this.indexOf(a), this.indexOf(b))
 		},
 	},
-	into = function(transformerFn) {
+	BOOL_TEMP = {
+		switch() {
+			this.$ = !this.$;
+		}
+	},
+	intoFn = function(transformerFn) {
 		const ptr = $(undefined);
 		this.watch($ => ptr.$ = transformerFn($));
 		return ptr;
@@ -109,13 +114,9 @@ const
 						}
 					},
 	
-					into
+					into: intoFn
 				},
-				typeof value == "boolean" ? {
-					switch() {
-						this.$ = !this.$
-					}
-				} : undefined,
+				typeof value == "boolean" ? BOOL_TEMP : undefined,
 				// "number string".includes(typeof value) ? {
 
 				// } : undefined,
