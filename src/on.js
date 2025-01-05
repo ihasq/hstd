@@ -15,6 +15,10 @@ const
 					globalThis.addEventListener(eventName, e => targetMap.get(e.target)?.[eventName]?.forEach?.(x => x(e)), { passive: true })
 					registeredEvent += eventName + "\0"
 				}
+				if(typeof callbackFn == "object") {
+					const callbackFnBody = callbackFn.fn;
+					callbackFn = callbackFnBody;
+				};
 				if(!targetMap.has(ref)) targetMap.set(ref, {});
 				(targetMap.get(ref)[eventName] ||= []).push(callbackFn)
 			}, undefined, { name: "on." + eventName })).publish()

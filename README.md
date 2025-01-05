@@ -1,7 +1,7 @@
 # 🐛 lib[h](https://libh.js.org)
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/vitejs-vite-vcga6uwx?file=main.js)
 [![NPM Version](https://img.shields.io/npm/v/libh)](https://www.npmjs.com/package/libh)
-[![npm bundle size](https://img.shields.io/bundlephobia/minzip/libh)](https://bundlephobia.com/package/libh)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/libh)](https://bundlephobia.com/package/libh)\
 ```javascript
 // get ingredients
 
@@ -30,13 +30,19 @@ document.body.append(...Component());
 
 Visit live [demo](https://ihasq.com/libh/demo/count).
 
+---
+- **[Install](#install)**
+- **[Examples](#examples)**
+
+---
+
 ## Install
 ```sh
 npm i libh
 ```
 
-## Example
-[Class-model](#class-model) | [Bidirecetional binding](#bidirecetional-binding) | [Post-processing](#post-processing)
+## Examples
+**[Class-model](#class-model) | [Bidirecetional binding](#bidirecetional-binding) | [Post-processing](#post-processing)**
 
 ### Class-model
 ```javascript

@@ -62,7 +62,13 @@ const
 				value = resolvedNewValue
 				watchers.forEach(execWatcher)
 			},
+
+			/**@type { { Function[] } } */
 			watchers = [],
+
+			/**@type { { callback: Function, timeout: number }[] } */
+			timeoutedWatchers = [],
+
 			watcherMap = new WeakMap(),
 			watcherIgnoreList = new WeakMap()
 		;
@@ -72,7 +78,7 @@ const
 				value,
 				ARR_TEMP
 			)
-			: Object_freeze(Object_assign(
+			: Object_assign(
 				{
 					[Symbol.toPrimitive](hint) {
 						return hint === PTR_IDENTIFIER;
@@ -82,9 +88,13 @@ const
 						publishedPtr[symbol] = this;
 						return symbol
 					},
-					watch(watcherFn) {
-						watcherFn(value);
-						watcherMap.set(watcherFn, watchers.push(watcherFn) - 1);
+					watch(watcherFn, timeout) {
+						if(timeout >= 0) {
+							const id = setTimeout(() => watcherFn(value), timeout);
+						} else {
+							watcherFn(value);
+						}
+						watcherMap.set(watcherFn, { index: watchers.push(watcherFn) - 1, timeout });
 						return this;
 					},
 					ignore: {
@@ -96,7 +106,7 @@ const
 						},
 					},
 					abort(watcherFn) {
-						delete watchers[watcherMap.get(watcherFn) || -1]
+						delete watchers[watcherMap.get(watcherFn).index || -1]
 					},
 					get setter() {
 						return setterFn
@@ -121,7 +131,7 @@ const
 
 				// } : undefined,
 				// typeof value == "number" ? NUM_TEMP : undefined,
-			))
+			)
 	}
 ;
 
