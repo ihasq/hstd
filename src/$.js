@@ -36,7 +36,7 @@ const
 	},
 	into = function(transformerFn) {
 		const ptr = $(undefined);
-		this.watch($ => ptr.$ = $);
+		this.watch($ => ptr.$ = transformerFn($));
 		return ptr;
 	},
 	setterFnTemp = $ => $,
@@ -111,6 +111,11 @@ const
 	
 					into
 				},
+				typeof value == "boolean" ? {
+					switch() {
+						this.$ = !this.$
+					}
+				} : undefined,
 				// "number string".includes(typeof value) ? {
 
 				// } : undefined,

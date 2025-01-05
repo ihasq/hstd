@@ -36,6 +36,7 @@ npm i libh
 ```
 
 ## Example
+[Class-model](#class-model) | [Bidirecetional binding](#bidirecetional-binding) | [Post-processing](#post-processing)
 
 ### Class-model
 ```javascript
