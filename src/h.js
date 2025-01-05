@@ -1,4 +1,4 @@
-// ihasq/h ❤ lit-html's textEndRegex
+// ihasq/h ❤ lit-html's textEndRegex ❤
 
 const
 
