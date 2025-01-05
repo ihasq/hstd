@@ -48,8 +48,6 @@ const
 			idList = {}
 		;
 
-		console.log(newNode.innerHTML)
-
 		Object.keys(placeholder).forEach((id, index) => {
 
 			const
