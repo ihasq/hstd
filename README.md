@@ -112,19 +112,19 @@ function Canvas() {
     const name = $(""), email = $("");
 
     return html`
-        <ul>${customers.into(({ name, email }) => html`
-            <li>name: ${name.$}, email: ${email.$}</li>
+        <ul>${customers.into(({ name, email }, ref) => html`
+            <li>name: ${name}, email: ${email}</li>
             <button ${{
                 [on.click]() {
-                    customers.removeOf(this[html])
+                    ref.removeOf(this[html])
                 }
             }}>x</button>
-        `, { sync: true })}</ul>
+        `, { sync: true, draggable: true })}</ul>
         <input ${{ value: name, type: "string" }}>
         <input ${{ value: email, type: "email" }}>
 
         <button ${{ [on.click]: () => {
-            customers.push({ name: name.$, email, email.$ });
+            customers.push({ name: name.$, email: email.$ });
             name.$ = "";
             email.$ = "";
         } }}>submit</button>
