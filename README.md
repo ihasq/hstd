@@ -117,7 +117,14 @@ function Canvas() {
         <input ${{ value: email, type: "email" }}>
 
         <button ${{ [on.click]: () => {
-            customers.push(html`<li>name: ${name.$}, email: ${email.$}</li><button ${{ [on.click]() { customer.removeOf(this[html]) } }}>x</button>`);
+            customers.push(html`
+                <li>name: ${name.$}, email: ${email.$}</li>
+                <button ${{
+                    [on.click]() {
+                        customers.removeOf(this[html])
+                    }
+                }}>x</button>
+            `);
 
             name.$ = "";
             email.$ = "";

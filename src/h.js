@@ -46,7 +46,7 @@ const
 			return this;
 		},
 		[Symbol.toPrimitive](hint) {
-			return hint === HTML_IDENTIFIER
+			return typeof hint == "string" ? HTML_IDENTIFIER : hint === HTML_IDENTIFIER
 		},
 		[Symbol.iterator]: function* () {
 
