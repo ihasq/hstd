@@ -93,10 +93,13 @@ const
 						attrPropType = typeof attrProp
 					;
 					if(attrPropType === "symbol") {
+
 						const ptr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
 						if(!ptr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) return;
 						ptr.$(attrValue, ref);
+
 					} else if(attrPropType === "string") {
+
 						if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
 							if(attrProp === "value" && ref instanceof HTMLInputElement) {
 								const oninput = $ => ref.value = $;
@@ -109,6 +112,7 @@ const
 							} else {
 								attrValue.watch($ => ref[attrProp] = $)
 							}
+
 						} else if(attrProp === "id" && !(attrValue in idList)) {
 							idList[attrValue] = ref;
 						} else {
