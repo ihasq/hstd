@@ -57,6 +57,7 @@ const
 		}
 	},
 	publishedPtr = {},
+	propCache = { swap: true, swapOf: true, into: true },
 	$ = (value, setterFn = setterFnTemp, options) => {
 		const
 			description = resolverSignature + (options?.name || ""),
@@ -79,27 +80,29 @@ const
 
 		return publishedPtr[symbol] = Array_isArray(value)
 			? new Proxy({
-				element: {},
+				element: [],
 				reverseObjectMap: new WeakMap(),
 				reversePrimitiveMap: new Map(),
 				length: 0,
-				propCache: {},
 				push(...elements) {
 					elements.forEach(element => {
-						const index = this.length++;
-						this.element[index] = element;
+						const index = this.element.length;
+						this.element.push(element);
 						this[`reverse${"function object".includes(typeof element)? "Object" : "Primitive"}Map`].set(element, index)
 					})
 				},
 				indexOf(searchElement, fromIndex) {
 					this[`reverse${"function object".includes(typeof searchElement)? "Object" : "Primitive"}Map`].get(searchElement)?.index || -1;
+				},
+				into(callbackFn) {
+
 				}
 
 			}, {
 				get(target, prop) {
 					return typeof prop == "number"
 						? target.element[prop]
-						: prop in Array.prototype || (target.propCache[prop] ||=  (!prop.includes("\0") && "\0swap\0swapOf\0into\0".includes(`\0${prop}\0`)))
+						: prop in Array.prototype || propCache[prop]
 						? target[prop]
 						: undefined
 					;
