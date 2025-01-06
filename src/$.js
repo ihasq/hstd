@@ -33,6 +33,10 @@ const
 		swapOf(a, b) {
 			return this.swap(this.indexOf(a), this.indexOf(b))
 		},
+
+		into(transformerFn) {
+
+		}
 	},
 	BOOL_TEMP = {
 		switch() {
@@ -74,10 +78,33 @@ const
 		;
 
 		return publishedPtr[symbol] = Array_isArray(value)
-			? Object_assign(
-				value,
-				ARR_TEMP
-			)
+			? new Proxy({
+				element: {},
+				reverseObjectMap: new WeakMap(),
+				reversePrimitiveMap: new Map(),
+				length: 0,
+				propCache: {},
+				push(...elements) {
+					elements.forEach(element => {
+						const index = this.length++;
+						this.element[index] = element;
+						this[`reverse${"function object".includes(typeof element)? "Object" : "Primitive"}Map`].set(element, index)
+					})
+				},
+				indexOf(searchElement, fromIndex) {
+					this[`reverse${"function object".includes(typeof searchElement)? "Object" : "Primitive"}Map`].get(searchElement)?.index || -1;
+				}
+
+			}, {
+				get(target, prop) {
+					return typeof prop == "number"
+						? target.element[prop]
+						: prop in Array.prototype || (target.propCache[prop] ||=  (!prop.includes("\0") && "\0swap\0swapOf\0into\0".includes(`\0${prop}\0`)))
+						? target[prop]
+						: undefined
+					;
+				}
+			})
 			: Object_assign(
 				{
 					[Symbol.toPrimitive](hint) {

@@ -14,8 +14,11 @@ const
 	},
 
 	elementTempMap = new WeakMap(),
+	fragElementMap = new WeakMap(),
 
-	transformFrag = ({ s, v, f }) => {
+	transformFrag = (frag) => {
+
+		const { s, v, f } = frag;
 
 		let elementTemp = elementTempMap.get(s);
 
@@ -28,18 +31,18 @@ const
 			const
 				attrMatch = Array.from(joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*?${tokenBuf}`, "g")).map(({ 0: { length }, index }) => index + length)),
 				placeholder = {},
-				tempDiv = document.createElement("div")
+				node = document.createElement("div")
 			;
 
-			df.appendChild(tempDiv);
+			df.appendChild(node);
 
-			tempDiv.innerHTML = joined.replaceAll(tokenBuf, (match, index) => {
+			node.innerHTML = joined.replaceAll(tokenBuf, (match, index) => {
 				let id;
 				while(joined.includes(id = String.fromCharCode(...createToken()))) {};
 				return (placeholder[id] = attrMatch.includes(index + TOKEN_LENGTH)) ? id : `<br ${id}>` 
 			});
 
-			elementTempMap.set(s, elementTemp = { node: tempDiv, placeholder })
+			elementTempMap.set(s, elementTemp = { node, placeholder })
 		};
 
 		const
@@ -105,13 +108,16 @@ const
 				} else {
 					ref.previousSibling.textContent += attrBody + (ref.nextSibling?.textContent || "")
 					ref.nextSibling?.remove();
+					ref.remove();
 				}
 			}
 
 			ref.removeAttribute(id);
 		});
 
-		f?.(idList)
+		f?.(idList);
+
+		fragElementMap.set(frag, newNode);
 
 		return newNode.children;
 	},
