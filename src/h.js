@@ -14,11 +14,22 @@ const
 	},
 
 	elementTempMap = new WeakMap(),
-	fragElementMap = new WeakMap(),
 
-	transformFrag = (frag) => {
+	df = document.createDocumentFragment(),
 
-		const { s, v, f } = frag;
+	fragmentTemp = {
+		then(onloadCallbackFn) {
+			onloadCallbackFn(this.id)
+			return this;
+		},
+		[Symbol.toPrimitive](hint) {
+			return typeof hint == "string" ? HTML_IDENTIFIER : hint === HTML_IDENTIFIER
+		},
+		// [Symbol.iterator]: function* () {
+		// 	for(const child of transformFrag(this)) yield child;
+		// }
+	},
+	h = (s, ...v) => {
 
 		let elementTemp = elementTempMap.get(s);
 
@@ -42,11 +53,11 @@ const
 				return (placeholder[id] = attrMatch.includes(index + TOKEN_LENGTH)) ? id : `<br ${id}>` 
 			});
 
-			elementTempMap.set(s, elementTemp = { node, placeholder })
+			elementTempMap.set(s, elementTemp = [node, placeholder])
 		};
 
 		const
-			{ node, placeholder } = elementTemp,
+			[node, placeholder] = elementTemp,
 			newNode = node.cloneNode(true),
 			idList = {}
 		;
@@ -100,7 +111,7 @@ const
 			} else {
 				const primitiveDef = attrBody[Symbol.toPrimitive];
 				if(primitiveDef?.(HTML_IDENTIFIER)) {
-					ref.replaceWith(...transformFrag(attrBody))
+					ref.replaceWith(...attrBody)
 				} else if(primitiveDef?.(PTR_IDENTIFIER)) {
 					const txt = new Text("")
 					attrBody.watch($ => txt.textContent = $);
@@ -115,30 +126,12 @@ const
 			ref.removeAttribute(id);
 		});
 
-		f?.(idList);
+		// f?.(idList);
 
-		fragElementMap.set(frag, newNode);
+		// fragElementMap.set(frag, newNode);
 
-		return newNode.children;
-	},
-
-	df = document.createDocumentFragment(),
-
-	fragmentTemp = {
-		then(onloadCallbackFn) {
-			if(!this.f) {
-				this.f = onloadCallbackFn;
-			}
-			return this;
-		},
-		[Symbol.toPrimitive](hint) {
-			return typeof hint == "string" ? HTML_IDENTIFIER : hint === HTML_IDENTIFIER
-		},
-		[Symbol.iterator]: function* () {
-			for(const child of transformFrag(this)) yield child;
-		}
-	},
-	h = (s, ...v) => Object.assign({ s, v }, fragmentTemp)
+		return Object.assign(newNode.childNodes, fragmentTemp, { id: idList });
+	}
 ;
 
 /**
