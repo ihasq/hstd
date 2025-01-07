@@ -23,12 +23,13 @@ const
 			return this;
 		},
 		[Symbol.toPrimitive](hint) {
-			return typeof hint == "string" ? HTML_IDENTIFIER : hint === HTML_IDENTIFIER
+			return typeof hint == "string" ? [...this[Symbol.iterator]().map(element => element.outerHTML)].join("") : hint === HTML_IDENTIFIER
 		},
-		// [Symbol.iterator]: function* () {
-		// 	for(const child of transformFrag(this)) yield child;
-		// }
+		toString() {
+			return this[Symbol.toPrimitive]("string")
+		}
 	},
+
 	h = (s, ...v) => {
 
 		let elementTemp = elementTempMap.get(s);
@@ -47,7 +48,7 @@ const
 
 			df.appendChild(node);
 
-			node.innerHTML = joined.replaceAll(tokenBuf, (match, index) => {
+			node.innerHTML = joined.replaceAll(tokenBuf, (_, index) => {
 				let id;
 				while(joined.includes(id = String.fromCharCode(...createToken()))) {};
 				return (placeholder[id] = attrMatch.includes(index + TOKEN_LENGTH)) ? id : `<br ${id}>` 
@@ -66,15 +67,15 @@ const
 
 			const
 				ref = newNode.querySelector(`[${id}]`),
-				attrBody = v[index]
+				vBody = v[index]
 			;
 
 			if(placeholder[id]) {
 
-				Reflect.ownKeys(attrBody).forEach(attrProp => {
+				Reflect.ownKeys(vBody).forEach(attrProp => {
 
 					const
-						attrValue = attrBody[attrProp],
+						attrValue = vBody[attrProp],
 						attrPropType = typeof attrProp
 					;
 
@@ -83,52 +84,63 @@ const
 						const ptr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
 						if(!ptr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) return;
 						ptr.$(attrValue, ref);
+						return;
 
 					}
 					if(attrPropType == "string") {
 
 						if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
+
 							if(attrProp == "value" && ref instanceof HTMLInputElement) {
+
 								const oninput = $ => ref.value = $;
 								attrValue.watch(oninput);
+
 								ref.addEventListener("input", ({ target: { value } }) => setTimeout(() => {
+
 									attrValue.ignore.set(oninput);
 									attrValue.$ = value
 									attrValue.ignore.delete(oninput);
+
 								}), { passive: true })
+
 							} else {
+
 								attrValue.watch($ => ref[attrProp] = $)
+
 							}
 
 						} else if(attrProp == "id" && !(attrValue in idList)) {
+
 							idList[attrValue] = ref;
+
 						} else {
+
 							ref[attrProp] = attrValue;
+
 						}
 					}
 				});
 
 			} else {
-				const primitiveDef = attrBody[Symbol.toPrimitive];
+
+				const primitiveDef = vBody[Symbol.toPrimitive];
+
 				if(primitiveDef?.(HTML_IDENTIFIER)) {
-					ref.replaceWith(...attrBody)
-				} else if(primitiveDef?.(PTR_IDENTIFIER)) {
-					const txt = new Text("")
-					attrBody.watch($ => txt.textContent = $);
-					ref.replaceWith(txt)
+
+					ref.replaceWith(...vBody)
+
 				} else {
-					ref.previousSibling.textContent += attrBody + (ref.nextSibling?.textContent || "")
-					ref.nextSibling?.remove();
-					ref.remove();
+					
+					const txt = new Text("")
+					ref.replaceWith(txt)
+					primitiveDef?.(PTR_IDENTIFIER) ? vBody.watch($ => txt.textContent = $) : txt.textContent = vBody
+
 				}
 			}
 
 			ref.removeAttribute(id);
 		});
-
-		// f?.(idList);
-
-		// fragElementMap.set(frag, newNode);
 
 		return Object.assign(newNode.childNodes, fragmentTemp, { id: idList });
 	}
