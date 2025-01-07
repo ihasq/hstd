@@ -49,9 +49,11 @@ const
 			df.appendChild(node);
 
 			node.innerHTML = joined.replaceAll(tokenBuf, (_, index) => {
+
 				let id;
 				while(joined.includes(id = String.fromCharCode(...createToken()))) {};
 				return (placeholder[id] = attrMatch.includes(index + TOKEN_LENGTH)) ? id : `<br ${id}>` 
+
 			});
 
 			elementTempMap.set(s, elementTemp = [node, placeholder])
