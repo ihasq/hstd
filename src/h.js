@@ -30,6 +30,12 @@ const
 		}
 	},
 
+	bidirectionalElementMap = [
+		HTMLInputElement.prototype,
+		HTMLSelectElement.prototype,
+		HTMLTextAreaElement.prototype
+	],
+
 	h = (s, ...v) => {
 
 		let elementTemp = elementTempMap.get(s);
@@ -93,7 +99,7 @@ const
 
 						if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
 
-							if(attrProp == "value" && ref instanceof HTMLInputElement) {
+							if(attrProp == "value" && "value" in ref) {
 
 								const oninput = $ => ref.value = $;
 								attrValue.watch(oninput);
