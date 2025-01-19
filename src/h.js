@@ -30,6 +30,19 @@ const
 		}
 	},
 
+	refProxyHandler = {
+		get(target, prop) {
+			const targetValue = target[prop];
+			return (
+				typeof targetValue == "function" &&
+				targetValue.toString().endsWith("() { [native code] }")
+			)
+				? (...args) => targetValue.apply(target, args)
+				: targetValue
+			;
+		}
+	},
+
 	h = (s, ...v) => {
 
 		let elementTemp = elementTempMap.get(s);
@@ -114,7 +127,7 @@ const
 
 						} else if(attrProp == "id" && !(attrValue in idList)) {
 
-							idList[attrValue] = ref;
+							idList[attrValue] = new Proxy(ref, refProxyHandler);
 
 						} else {
 
