@@ -30,12 +30,6 @@ const
 		}
 	},
 
-	bidirectionalElementMap = [
-		HTMLInputElement.prototype,
-		HTMLSelectElement.prototype,
-		HTMLTextAreaElement.prototype
-	],
-
 	h = (s, ...v) => {
 
 		let elementTemp = elementTempMap.get(s);
