@@ -11,6 +11,19 @@
 			}
 		}
 	</script>
-	<script type="module" src="main.js"></script>
+	<style>
+		@font-face {
+			font-family: 'jbm';
+			src: url(./resources/JetBrainsMono-Bold.ttf);
+		}
+
+		@font-face {
+			font-family: "int";
+			src: url(./resources/Inter_24pt-Medium.ttf)
+		}
+	</style>
+	<script type="module">
+		document.body.append(...(await import("./main.js")).default())
+	</script>
 </head>
 </html>
