@@ -1,15 +1,34 @@
-import { $, h as html, on, css } from "libh";
+import { h as html, on, css } from "libh";
+/**
+ * 
+ * @param { string } href
+ * @param { HTMLCollection | string } child
+ * @returns { HTMLCollection }
+ */
+function Link(href, child) {
+	return html`<a ${{
+		href,
+		target: "_blank",
+		[css]: {
+			color: "#0203ff",
+			textDecoration: "none"
+		}
+	}}>${child}</a>`;
+}
 
 /**
  * 
- * @param {{ src: string, alt: string, href: string }} param0 
- * @returns 
+ * @param { string } src
+ * @param { string } alt
+ * @param { string } href
+ * @returns { HTMLCollection }
  */
-function Badge({ src, alt, href }) {
-	return html`
-		<a ${{ href, target: "_blank", [css.textDecoration]: "none" }}><img ${{ src, alt }}></a>
-	`;
+function Badge(src, alt, href) {
+	return Link(href, html`
+		<img ${{ src, alt }}>
+	`);
 }
+
 
 export default function() {
 	return html`
@@ -18,35 +37,33 @@ export default function() {
 				boxSizing: "border-box",
 				padding: "60px calc(20% - 60px)",
 				fontFamily: "int"
-			}
+			},
 		}}>
 
 			<h1 ${{
 				[css.margin]: "40px 0",
 				[css.fontFamily]: 'jbm'
 			}}>
-				&lt;<a ${{ href: "https://libh.js.org", [css.textDecoration]: "none" }}>libh</a>&gt;
+				lib${Link("https://libh.js.org", "h")}
 			</h1>
 
 			<div ${{ [css.margin]: "0 0 20px" }}>
-				<a ${{ href: "https://github.com/ihasq/libh", target: "_blank" }}>GitHub</a>
-				<a ${{ href: "https://stackblitz.com/edit/vitejs-vite-vcga6uwx?file=main.js", target: "_blank" }}>StackBlitz</a>
+				${Link("https://github.com/ihasq/libh", "GitHub")}
+				${Link("https://stackblitz.com/edit/vitejs-vite-vcga6uwx?file=main.js", "StackBlitz")}
 			</div>
 
 			<div ${{ [css.margin]: "0 0 20px" }}>
-				${Badge({
-					src: "https://img.shields.io/npm/v/libh?logo=npm&color=%23CC3534", 
-					alt: "npm version badge",
-					href: "https://npmjs.com/package/libh"
-				})}
-				${Badge({
-					src: "https://img.shields.io/bundlejs/size/libh?logo=stackblitz",
-					alt: "npm package minimized gzipped size",
-					href: "https://bundlephobia.com/package/libh"
-				})}
+				${Badge("https://img.shields.io/npm/v/libh?logo=npm&color=%23CC3534", "npm version badge", "https://npmjs.com/package/libh")}
+				${Badge("https://img.shields.io/bundlejs/size/libh?logo=stackblitz", "npm package minimized gzipped size", "https://bundlephobia.com/package/libh")}
 			</div>
 
-			<div ${{ [css.margin]: "40px 0 0" }}>libh is a minimal JavaScript library to build simple, reactive, extensible web interface.</div>
+			<div ${{ [css.margin]: "40px 0 0" }}>
+				libh is a minimal JavaScript library to build simple, reactive, extensible web interface. 
+			</div>
+
+			<div ${{ [css.margin]: "20px 0 0" }}>
+				${Link("https://github.com/ihasq/libh/tree/main/docs/main.js", "source")} of this page is available.
+			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
 				<h2 ${{ [css.fontFamily]: 'jbm' }}>Install</h2>
@@ -72,7 +89,7 @@ export default function() {
 			<div ${{ [css.margin]: "60px 0" }}>
 				<h2 ${{ [css.fontFamily]: 'jbm' }}>License</h2>
 
-				libh is <a ${{ href: "https://www.wtfpl.net" }}>WTFPL licensed</a>.
+				libh is ${Link("https://www.wtfpl.net", "WTFPL licensed")}.
 			</div>
 
 
