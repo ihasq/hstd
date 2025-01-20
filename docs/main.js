@@ -76,6 +76,7 @@ export default function() {
 						margin: "30px 0",
 						borderRadius: "4px",
 						width: "40%",
+						userSelect: "none",
 
 						padding: "16px 20px",
 						fontSize: "16px"

@@ -8,7 +8,9 @@ const
 	targetMap = new WeakMap(),
 	on = new Proxy({}, {
 		get(_, eventName) {
-			return eventName === Symbol.toPrimitive || eventName === "$"
+			return eventName === Symbol.toPrimitive
+			? () => bundled.publish()
+			: eventName === "$"
 			? bundled.publish()
 			: (handlerCache[eventName] ||= $((callbackFn, ref) => {
 				if(!(registeredEvent.includes(eventName))) {
