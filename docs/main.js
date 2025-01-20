@@ -58,6 +58,7 @@ export default function() {
 						color: "#a2a3bf",
 						margin: "30px 0",
 						borderRadius: "4px",
+						width: "40%",
 
 						padding: "16px 20px",
 						fontSize: "16px"
