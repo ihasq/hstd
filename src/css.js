@@ -12,7 +12,7 @@ const
 
 	formStyleProp = (styleProp) => formedStyleProp[styleProp] ||= styleProp.replaceAll(formerRegex, lowercaseMatcher),
 
-	bundledProp = $((value, ref) => Object.keys(value).forEach(styleProp => ref.style[formStyleProp(styleProp)] = value[styleProp])),
+	bundledProp = $((value, ref) => ref.style.cssText = Object.keys(value).map(prop => `${formStyleProp(prop)}:${value[prop]};`).join("")),
 
 	getBundled = () => bundledProp.publish(),
 
@@ -21,7 +21,7 @@ const
 			return styleProp === Symbol.toPrimitive
 			? getBundled
 			: styleProp === "$"
-			? bundledProp.publish()
+			? getBundled()
 			: (styleCache[styleProp] ||= $((value, ref) => {
 				ref.style[formStyleProp(styleProp)] = value
 			})).publish()

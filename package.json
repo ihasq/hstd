@@ -2,6 +2,7 @@
   "name": "libh",
   "version": "0.0.49",
   "description": "blazingly fast vdom alternative ahh javascript",
+  "type": "module",
   "main": "src/mod.js",
   "directories": {
     "test": "test"
@@ -18,6 +19,9 @@
   "license": "WTFPL",
   "bugs": {
     "url": "https://github.com/ihasq/libh/issues"
+  },
+  "exports": {
+    ".": "./src/mod.js"
   },
   "homepage": "https://github.com/ihasq/libh#readme"
 }

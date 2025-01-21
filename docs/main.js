@@ -93,7 +93,5 @@ export default function() {
 				libh is ${Link("https://www.wtfpl.net", "WTFPL licensed")}.
 			</div>
 
-
-		</div>
 	`;
 }

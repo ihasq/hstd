@@ -6,12 +6,13 @@ const
 	handlerCache = {},
 	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(event => ref.addEventListener(event, callbacks[event], { passive: true }))),
 	targetMap = new WeakMap(),
+	bundledPublishFn = () => bundled.publish(),
 	on = new Proxy({}, {
 		get(_, eventName) {
 			return eventName === Symbol.toPrimitive
-			? () => bundled.publish()
+			? bundledPublishFn
 			: eventName === "$"
-			? bundled.publish()
+			? bundledPublishFn()
 			: (handlerCache[eventName] ||= $((callbackFn, ref) => {
 				if(!(registeredEvent.includes(eventName))) {
 					globalThis.addEventListener(eventName, e => targetMap.get(e.target)?.[eventName]?.forEach?.(x => x(e)), { passive: true })
