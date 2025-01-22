@@ -138,6 +138,15 @@ const
 					abort(watcherFn) {
 						delete watchers[watcherMap.get(watcherFn).index || -1]
 					},
+					until(value) {
+						let watcherFn;
+						return new Promise(resolveWait => this.watch(watcherFn = newValue => {
+							if(typeof value == "function" ? value(newValue) : newValue === value) {
+								this.abort(watcherFn);
+								resolveWait(value);
+							};
+						}))
+					},
 					get setter() {
 						return setterFn
 					},
