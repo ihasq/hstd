@@ -143,7 +143,7 @@ const
 						return new Promise(resolveWait => this.watch(watcherFn = newValue => {
 							if(typeof value == "function" ? value(newValue) : newValue === value) {
 								this.abort(watcherFn);
-								resolveWait(value);
+								resolveWait(newValue);
 							};
 						}))
 					},

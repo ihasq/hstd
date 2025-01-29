@@ -94,19 +94,33 @@ const
 						attrPropType = typeof attrProp
 					;
 
+					// resolve prop
+
+					// let ptr;
+
 					if(attrPropType == "symbol") {
 
-						const ptr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
-						if(!ptr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) return;
-						ptr.$(attrValue, ref);
-						return;
+						const attrPtr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
 
-					}
-					if(attrPropType == "string") {
+						if(!attrPtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) return;
 
 						if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
 
-							if(attrProp == "value" && "value" in ref) {
+							attrValue.watch(newAttrValue => attrPtr.$(newAttrValue, ref))
+
+						} else {
+
+							attrPtr.$(attrValue, ref)
+
+						}
+						// attrValue.watch(newValue => attrPtr.$(newValue, ref))
+						// attrPtr.$(attrValue, ref);
+
+					} else if(attrPropType == "string") {
+
+						if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
+
+							if(attrProp == "value" && attrProp in ref) {
 
 								const oninput = $ => ref.value = $;
 								attrValue.watch(oninput);
@@ -121,7 +135,7 @@ const
 
 							} else {
 
-								attrValue.watch($ => ref[attrProp] = $)
+								attrValue.watch(newAttrValue => ref[attrProp] = newAttrValue)
 
 							}
 
@@ -143,7 +157,7 @@ const
 
 				if(primitiveDef?.(HTML_IDENTIFIER)) {
 
-					ref.replaceWith(...vBody)
+					ref.replaceWith.apple(null, vBody);
 
 				} else {
 					
