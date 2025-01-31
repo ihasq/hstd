@@ -157,7 +157,7 @@ const
 
 				if(primitiveDef?.(HTML_IDENTIFIER)) {
 
-					ref.replaceWith.apply(null, vBody);
+					ref.replaceWith(...vBody);
 
 				} else {
 					
