@@ -42,6 +42,11 @@ Visit live [demo](https://ihasq.com/libh/demo/count).
 npm i libh
 ```
 
+## Download
+```javascript
+import { $, h as html } from "https://libh.dev";
+```
+
 ## Examples
 **[Class-model](#class-model) | [Bidirecetional binding](#bidirecetional-binding) | [Post-processing](#post-processing)**
 
