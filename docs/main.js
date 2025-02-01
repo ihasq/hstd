@@ -29,6 +29,28 @@ function Badge(src, alt, href) {
 	`);
 }
 
+function CommandArea(text) {
+	return html`
+		<code ${{
+			[css]: {
+				display: "block",
+				backgroundColor: "#02030f",
+				color: "#a2a3bf",
+				margin: "30px 0",
+				borderRadius: "4px",
+				width: "40%",
+				userSelect: "none",
+
+				padding: "16px 20px",
+				fontSize: "16px"
+			},
+			[on.click]() {
+				navigator.clipboard.writeText(text)
+			}
+		}}>$ <span ${{ [css.color]: "#f2f3ff" }}>${text}<span></code>
+	`
+}
+
 
 export default function() {
 	return html`
@@ -68,23 +90,13 @@ export default function() {
 			<div ${{ [css.margin]: "60px 0" }}>
 				<h2 ${{ [css.fontFamily]: 'jbm' }}>Install</h2>
 
-				<code ${{
-					[css]: {
-						display: "block",
-						backgroundColor: "#02030f",
-						color: "#a2a3bf",
-						margin: "30px 0",
-						borderRadius: "4px",
-						width: "40%",
-						userSelect: "none",
+				${CommandArea("npm i libh")}
+			</div>
 
-						padding: "16px 20px",
-						fontSize: "16px"
-					},
-					[on.click]() {
-						navigator.clipboard.writeText("npm i libh")
-					}
-				}}>$ <span ${{ [css.color]: "#f2f3ff" }}>npm i libh<span></code>
+			<div ${{ [css.margin]: "60px 0" }}>
+				<h2 ${{ [css.fontFamily]: 'jbm' }}>Download</h2>
+
+				${CommandArea("import { $, h as html } from \"https://libh.dev\"")}
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>

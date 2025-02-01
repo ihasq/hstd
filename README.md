@@ -1,4 +1,4 @@
-# 🐛 lib[h](https://libh.js.org)
+# 🐛 lib[h](https://libh.dev)
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/vitejs-vite-vcga6uwx?file=main.js)
 [![NPM Version](https://img.shields.io/npm/v/libh?logo=npm&color=%23CC3534)](https://www.npmjs.com/package/libh)
 [![npm package minimized gzipped size](https://img.shields.io/bundlejs/size/libh?logo=stackblitz)](https://bundlephobia.com/package/libh)
