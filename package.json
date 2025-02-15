@@ -1,6 +1,6 @@
 {
   "name": "libh",
-  "version": "0.0.54",
+  "version": "0.0.53",
   "description": "blazingly fast vdom alternative ahh javascript",
   "type": "module",
   "main": "src/mod.js",
