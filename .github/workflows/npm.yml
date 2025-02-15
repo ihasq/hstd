@@ -17,10 +17,10 @@ jobs:
     # steps以下は順に実行される
     # https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idsteps
     steps:
+      - uses: actions/checkout@v2
 
       # Unit Test実行
       - name: Run Test
-        uses: actions/checkout@main
         run: |
           cd /app
           npm publish
