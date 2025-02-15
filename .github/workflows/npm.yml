@@ -10,7 +10,7 @@ on:
 
 # https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#jobs
 jobs:
-  test_job:
+  deploy:
     # ubuntuをサーバーとして使用
     runs-on: ubuntu-latest
 
@@ -21,7 +21,6 @@ jobs:
       # Unit Test実行
       - name: Run Test
         run: |
-          npm version patch
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
