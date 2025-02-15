@@ -23,5 +23,9 @@ jobs:
       - name: Run Test
         run: |
           npm publish --provenance --access public
+          uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: 'https://registry.npmjs.org'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
