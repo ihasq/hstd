@@ -1,0 +1,26 @@
+# ワークフローの名前
+name: deploy to npm
+
+# ワークフローが起動する条件
+# https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#on
+on:
+  # mainブランチへのプルリクエストが更新されたら
+  pull_request:
+    branches: [ 'main' ]
+
+# https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#jobs
+jobs:
+  test_job:
+    # ubuntuをサーバーとして使用
+    runs-on: ubuntu-latest
+
+    # steps以下は順に実行される
+    # https://docs.github.com/ja/actions/writing-workflows/workflow-syntax-for-github-actions#jobsjob_idsteps
+    steps:
+
+      # Unit Test実行
+      - name: Run Test
+        run: |
+          npm version patch
+          npm publish
+
