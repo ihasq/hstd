@@ -23,6 +23,6 @@ jobs:
       - name: Run Test
         run: |
           npm version patch
-          npm publish --provenance --access public
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
