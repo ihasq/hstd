@@ -20,6 +20,7 @@ jobs:
 
       # Unit Test実行
       - name: Run Test
+        uses: actions/checkout@main
         run: |
           cd /app
           npm publish
