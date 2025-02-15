@@ -21,6 +21,7 @@ jobs:
       # Unit Test実行
       - name: Run Test
         run: |
+          cd /app
           npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
