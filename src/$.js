@@ -78,7 +78,7 @@ const
 			watcherIgnoreList = new WeakMap()
 		;
 
-		return publishedPtr[symbol] = Array_isArray(value)
+		return publishedPtr[symbol] = /**Array_isArray(value)
 			? new Proxy({
 				element: [],
 				reverseObjectMap: new WeakMap(),
@@ -108,7 +108,7 @@ const
 					;
 				}
 			})
-			: Object_assign(
+			: */Object_assign(
 				{
 					[Symbol.toPrimitive](hint) {
 						return hint === PTR_IDENTIFIER;
@@ -119,7 +119,7 @@ const
 						return symbol
 					},
 					watch(watcherFn, timeout) {
-						if(timeout >= 0) {
+						if(typeof timeout == "number") {
 							const id = setTimeout(() => watcherFn(value), timeout);
 						} else {
 							watcherFn(value);
