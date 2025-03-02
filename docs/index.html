@@ -35,7 +35,8 @@
 		}
 	</style>
 	<script type="module">
-		document.body.append(...(await import("./main.js")).default())
+		import main from "./main.js";
+		document.body.append(...main())
 	</script>
 </head>
 </html>

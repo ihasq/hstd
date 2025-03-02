@@ -18,10 +18,6 @@ const
 	df = document.createDocumentFragment(),
 
 	fragmentTemp = {
-		then(onloadCallbackFn) {
-			onloadCallbackFn(this.id)
-			return this;
-		},
 		[Symbol.toPrimitive](hint) {
 			return typeof hint == "string" ? [...this[Symbol.iterator]().map(element => element.outerHTML)].join("") : hint === HTML_IDENTIFIER
 		},
@@ -75,17 +71,17 @@ const
 		const
 			[node, placeholder] = elementTemp,
 			newNode = node.cloneNode(true),
-			idList = {}
+			id = {}
 		;
 
-		Object.keys(placeholder).forEach((id, index) => {
+		Object.keys(placeholder).forEach((identifier, index) => {
 
 			const
-				ref = newNode.querySelector(`[${id}]`),
+				ref = newNode.querySelector(`[${identifier}]`),
 				vBody = v[index]
 			;
 
-			if(placeholder[id]) {
+			if(placeholder[identifier]) {
 
 				Reflect.ownKeys(vBody).forEach(attrProp => {
 
@@ -139,9 +135,9 @@ const
 
 							}
 
-						} else if(attrProp == "id" && !(attrValue in idList)) {
+						} else if(attrProp == "id" && !(attrValue in id)) {
 
-							idList[attrValue] = new Proxy(ref, refProxyHandler);
+							id[attrValue] = new Proxy(ref, refProxyHandler);
 
 						} else {
 
@@ -168,10 +164,15 @@ const
 				}
 			}
 
-			ref.removeAttribute(id);
+			ref.removeAttribute(identifier);
 		});
 
-		return Object.assign(newNode.childNodes, fragmentTemp, { id: idList });
+		return Object.assign(newNode.childNodes, fragmentTemp, {
+			then(onloadCallbackFn) {
+				onloadCallbackFn(id)
+				return this;
+			}
+		});
 	}
 ;
 
