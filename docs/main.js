@@ -1,4 +1,4 @@
-import { h as html, on, css } from "libh";
+import { $, h as html, on, css } from "libh";
 /**
  * 
  * @param { string } href
@@ -51,6 +51,30 @@ function CommandArea(text) {
 	`
 }
 
+function Examples() {
+
+	const
+		count = $(Number(localStorage.getItem("count") || "0"))
+			.watch(newValue => localStorage.setItem("count", newValue))
+	;
+
+	return html`
+		<button ${{
+			[on]: {
+				click: () => count.$++
+			},
+			[css]: {
+				backgroundColor: "#0203ff",
+				color: "#f2f3ff",
+				padding: "12px",
+				borderRadius: "4px",
+				fontFamily: "int",
+				fontSize: "16px"
+			}
+		}}>❤ I love libh ${count} times! ❤</button><br>
+	`
+}
+
 
 export default function() {
 	return html`
@@ -66,7 +90,7 @@ export default function() {
 				[css.margin]: "40px 0",
 				[css.fontFamily]: 'jbm'
 			}}>
-				lib${Link("https://libh.js.org", "h")}
+				lib${Link("https://libh.dev", "h")}
 			</h1>
 
 			<div ${{ [css.margin]: "0 0 20px" }}>
@@ -97,6 +121,10 @@ export default function() {
 				<h2 ${{ [css.fontFamily]: 'jbm' }}>Download</h2>
 
 				${CommandArea("import { $, h as html } from \"https://libh.dev\"")}
+			</div>
+
+			<div ${{ [css.margin]: "60px 0" }}>
+				${Examples()}
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
