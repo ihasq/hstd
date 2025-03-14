@@ -43,7 +43,7 @@ const
 
 		if(!elementTemp) {
 
-			let joined = s.join(""), tokenBuf;
+			let joined = s.join(""), tokenBuf, replacementCounter = 0;
 			while(joined.includes(tokenBuf = String.fromCharCode(...createToken()))) {};
 			joined = s.join(tokenBuf);
 
@@ -55,7 +55,7 @@ const
 
 			df.appendChild(node);
 
-			node.innerHTML = joined.replaceAll(tokenBuf, (_, index) => (placeholder[placeholder.length] = attrMatch.includes(index + TOKEN_LENGTH)) ? tokenBuf : `<br ${tokenBuf}>` );
+			node.innerHTML = joined.replaceAll(tokenBuf, (_, index) => (placeholder[replacementCounter++] = attrMatch.includes(index + TOKEN_LENGTH)) ? tokenBuf : `<br ${tokenBuf}>` );
 
 			elementTempMap.set(s, elementTemp = [node, placeholder, tokenBuf])
 		};
