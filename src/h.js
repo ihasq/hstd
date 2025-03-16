@@ -96,6 +96,7 @@ export const h = (s, ...v) => {
 
 					if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
 
+						attrPtr.$(attrValue.$, ref)
 						attrValue.watch(newAttrValue => attrPtr.$(newAttrValue, ref))
 
 					} else {
@@ -110,6 +111,7 @@ export const h = (s, ...v) => {
 
 						if("value\0checked".includes(attrProp) && attrProp in ref) {
 
+							ref[attrProp] = attrValue.$;
 							const oninput = $ => ref[attrProp] = $;
 							attrValue.watch(oninput);
 
@@ -123,6 +125,7 @@ export const h = (s, ...v) => {
 
 						} else {
 
+							ref[attrProp] = attrValue.$
 							attrValue.watch(newAttrValue => ref[attrProp] = newAttrValue)
 
 						}

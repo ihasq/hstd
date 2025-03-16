@@ -44,7 +44,7 @@ const
 		}
 	},
 	into = function(transformerFn) {
-		const ptr = $(undefined);
+		const ptr = $(transformerFn(this.$));
 		this.watch($ => ptr.$ = transformerFn($));
 		return ptr;
 	},
@@ -119,11 +119,11 @@ const
 					return symbol
 				},
 				watch(watcherFn, timeout) {
-					if(typeof timeout == "number") {
-						const id = setTimeout(() => watcherFn(value), timeout);
-					} else {
-						watcherFn(value);
-					}
+					// if(typeof timeout == "number") {
+					// 	const id = setTimeout(() => watcherFn(value), timeout);
+					// } else {
+					// 	watcherFn(value);
+					// }
 					watcherMap.set(watcherFn, { index: watchers.push(watcherFn) - 1, timeout });
 					return this;
 				},
@@ -166,7 +166,7 @@ const
 				into,
 
 				text() {
-					const textNode = new Text();
+					const textNode = new Text(this.$);
 					this.watch(newValue => textNode.textContent = newValue);
 					return [textNode];
 				}
