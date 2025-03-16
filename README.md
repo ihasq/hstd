@@ -33,6 +33,7 @@ Visit live [demo](https://ihasq.com/libh/demo/count).
 ---
 - **[Install](#install)**
 - **[Examples](#examples)**
+- **[Demo](#demo)**
 - **[License](#license)**
 
 ---
@@ -137,6 +138,9 @@ function Canvas() {
     `
 }
 ```
+
+## Demo
++ [Passcore](https://ihasq.com/passcore) - Random Password Generator ([code](https://github.com/ihasq/passcore))
 
 ## License
 
