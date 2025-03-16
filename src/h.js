@@ -100,8 +100,7 @@ export const h = (s, ...v) => {
 					
 					const buf = attrPtr.$(attrValue, ref);
 
-
-					if(typeof buf != "object") return;
+					if(buf?.constructor !== Object) return;
 
 					Reflect.ownKeys(buf).forEach(attrResolve.bind(!1, buf));
 
