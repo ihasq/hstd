@@ -35,7 +35,9 @@ const
 				: targetValue
 			;
 		}
-	}
+	},
+
+	isPtr = (maybePtr) => maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)
 ;
 
 /**
@@ -81,33 +83,31 @@ export const h = (s, ...v) => {
 
 		if(placeholder[index]) {
 
-			const attrResolve = attrProp => {
+			const attrResolve = function(attrBody, attrProp) {
 
 				const
-					attrValue = vBody[attrProp],
+					attrValue = attrBody[attrProp],
 					attrPropType = typeof attrProp
 				;
+
+				console.log(attrPropType)
 
 				if(attrPropType == "symbol") {
 
 					const attrPtr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
 
-					if(!attrPtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) return;
+					if(!isPtr(attrPtr)) return;
+					
+					const buf = attrPtr.$(attrValue, ref);
 
-					if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
 
-						attrPtr.$(attrValue.$, ref)
-						attrValue.watch(newAttrValue => attrPtr.$(newAttrValue, ref))
+					if(typeof buf != "object") return;
 
-					} else {
-
-						attrPtr.$(attrValue, ref);
-
-					}
+					Reflect.ownKeys(buf).forEach(attrResolve.bind(!1, buf));
 
 				} else if(attrPropType == "string") {
 
-					if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
+					if(isPtr(attrValue)) {
 
 						if("value\0checked".includes(attrProp) && attrProp in ref) {
 
@@ -142,11 +142,11 @@ export const h = (s, ...v) => {
 				}
 			}
 
-			Reflect.ownKeys(vBody).forEach(attrResolve);
+			Reflect.ownKeys(vBody).forEach(attrResolve.bind(!1, vBody));
 
 		} else {
 
-			ref.replaceWith(...(vBody[Symbol.toPrimitive]?.(HTML_IDENTIFIER) ? vBody : vBody.text()));
+			ref.replaceWith(...(vBody[Symbol.toPrimitive]?.(HTML_IDENTIFIER) ? vBody : isPtr(vBody) ? vBody.text() : [new Text(vBody)]));
 
 		}
 

@@ -111,7 +111,7 @@ const
 		: */Object_assign(
 			{
 				[Symbol.toPrimitive](hint) {
-					return hint === PTR_IDENTIFIER;
+					return (typeof hint) == "symbol" ? hint === PTR_IDENTIFIER : symbol;
 				},
 				publish() {
 					const symbol = Symbol(description);
@@ -182,8 +182,8 @@ while((resolverSignature = String.fromCharCode(...resolverSignatureGenCB())) in 
 
 Object_defineProperty(globalThis, resolverSignature, {
 	value: (symbol) => publishedPtr[symbol],
-	configurable: false,
-	enumerable: false
+	configurable: !1,
+	enumerable: !1
 });
 
 /**
