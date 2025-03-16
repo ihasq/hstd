@@ -163,13 +163,15 @@ const
 						}
 					},
 	
-					into: intoFn
+					into: intoFn,
+
+					text() {
+						const textNode = new Text();
+						this.watch(newValue => textNode.textContent = newValue);
+						return [textNode];
+					}
 				},
 				typeof value == "boolean" ? BOOL_TEMP : undefined,
-				// "number string".includes(typeof value) ? {
-
-				// } : undefined,
-				// typeof value == "number" ? NUM_TEMP : undefined,
 			)
 	}
 ;
