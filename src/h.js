@@ -37,7 +37,9 @@ const
 		}
 	},
 
-	isPtr = (maybePtr) => maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)
+	isPtr = (maybePtr) => maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER),
+
+	bindResolver = (resolver, buf) => Reflect.ownKeys(buf).forEach(resolver.bind(!1, buf))
 ;
 
 /**
@@ -60,8 +62,7 @@ export const h = (s, ...v) => {
 		const
 			attrMatch = Array.from(joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*?${tokenBuf}`, "g")).map(({ 0: { length }, index }) => index + length)),
 			placeholder = [],
-			node = document.createElement("div"),
-			vLength = v.length
+			node = document.createElement("div")
 		;
 
 		df.appendChild(node);
@@ -90,8 +91,6 @@ export const h = (s, ...v) => {
 					attrPropType = typeof attrProp
 				;
 
-				console.log(attrPropType)
-
 				if(attrPropType == "symbol") {
 
 					const attrPtr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
@@ -102,7 +101,7 @@ export const h = (s, ...v) => {
 
 					if(buf?.constructor !== Object) return;
 
-					Reflect.ownKeys(buf).forEach(attrResolve.bind(!1, buf));
+					bindResolver(attrResolve, buf);
 
 				} else if(attrPropType == "string") {
 
@@ -141,7 +140,7 @@ export const h = (s, ...v) => {
 				}
 			}
 
-			Reflect.ownKeys(vBody).forEach(attrResolve.bind(!1, vBody));
+			bindResolver(attrResolve, vBody);
 
 		} else {
 
