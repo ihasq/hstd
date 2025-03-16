@@ -60,7 +60,7 @@ export const h = (s, ...v) => {
 		joined = s.join(tokenBuf);
 
 		const
-			attrMatch = Array.from(joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*?${tokenBuf}`, "g")).map(({ 0: { length }, index }) => index + length)),
+			attrMatch = [...joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*?${tokenBuf}`, "g"))].map(({ 0: { length }, index }) => index + length),
 			placeholder = [],
 			node = document.createElement("div")
 		;

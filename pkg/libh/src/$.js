@@ -1,6 +1,6 @@
 const
 	{
-		Array: { isArray: Array_isArray },
+		// Array: { isArray: Array_isArray },
 		Object: { assign: Object_assign, defineProperty: Object_defineProperty, freeze: Object_freeze },
 		globalThis: GLOBALTHIS
 	} = globalThis,
