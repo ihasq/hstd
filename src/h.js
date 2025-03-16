@@ -108,12 +108,12 @@ export const h = (s, ...v) => {
 
 					if(attrValue[Symbol.toPrimitive]?.(PTR_IDENTIFIER)) {
 
-						if(attrProp == "value" && attrProp in ref) {
+						if("value\0checked".includes(attrProp) && attrProp in ref) {
 
-							const oninput = $ => ref.value = $;
+							const oninput = $ => ref[attrProp] = $;
 							attrValue.watch(oninput);
 
-							ref.addEventListener("input", ({ target: { value } }) => setTimeout(() => {
+							ref.addEventListener("input", ({ target: { [attrProp]: value } }) => setTimeout(() => {
 
 								attrValue.ignore.set(oninput);
 								attrValue.$ = value

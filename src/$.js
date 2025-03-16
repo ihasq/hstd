@@ -43,7 +43,7 @@ const
 			this.$ = !this.$;
 		}
 	},
-	intoFn = function(transformerFn) {
+	into = function(transformerFn) {
 		const ptr = $(undefined);
 		this.watch($ => ptr.$ = transformerFn($));
 		return ptr;
@@ -57,7 +57,7 @@ const
 		}
 	},
 	publishedPtr = {},
-	propCache = { swap: true, swapOf: true, into: true },
+	// propCache = { swap: true, swapOf: true, into: true },
 	$ = (value, setterFn = setterFnTemp, options) => {
 		const
 			description = resolverSignature + (options?.name || ""),
@@ -108,71 +108,71 @@ const
 					;
 				}
 			})
-			: */Object_assign(
-				{
-					[Symbol.toPrimitive](hint) {
-						return hint === PTR_IDENTIFIER;
+		: */Object_assign(
+			{
+				[Symbol.toPrimitive](hint) {
+					return hint === PTR_IDENTIFIER;
+				},
+				publish() {
+					const symbol = Symbol(description);
+					publishedPtr[symbol] = this;
+					return symbol
+				},
+				watch(watcherFn, timeout) {
+					if(typeof timeout == "number") {
+						const id = setTimeout(() => watcherFn(value), timeout);
+					} else {
+						watcherFn(value);
+					}
+					watcherMap.set(watcherFn, { index: watchers.push(watcherFn) - 1, timeout });
+					return this;
+				},
+				ignore: {
+					set(watcherFn) {
+						watcherIgnoreList.set(watcherFn, true);
 					},
-					publish() {
-						const symbol = Symbol(description);
-						publishedPtr[symbol] = this;
-						return symbol
+					delete(watcherFn) {
+						watcherIgnoreList.set(watcherFn, false);
 					},
-					watch(watcherFn, timeout) {
-						if(typeof timeout == "number") {
-							const id = setTimeout(() => watcherFn(value), timeout);
-						} else {
-							watcherFn(value);
-						}
-						watcherMap.set(watcherFn, { index: watchers.push(watcherFn) - 1, timeout });
-						return this;
-					},
-					ignore: {
-						set(watcherFn) {
-							watcherIgnoreList.set(watcherFn, true);
-						},
-						delete(watcherFn) {
-							watcherIgnoreList.set(watcherFn, false);
-						},
-					},
-					abort(watcherFn) {
-						delete watchers[watcherMap.get(watcherFn).index || -1]
-					},
-					until(value) {
-						let watcherFn;
-						return new Promise(resolveWait => this.watch(watcherFn = newValue => {
-							if(typeof value == "function" ? value(newValue) : newValue === value) {
-								this.abort(watcherFn);
-								resolveWait(newValue);
-							};
-						}))
-					},
-					get setter() {
-						return setterFn
-					},
-					get $() {
-						return value
-					},
-					set $(newValue) {
-						newValue = setterFn(newValue);
-						if(newValue instanceof Promise) {
-							newValue.then(afterResolved)
-						} else if(value !== newValue) {
-							value = newValue;
-							watchers.forEach(execWatcher)
-						}
-					},
-	
-					into: intoFn,
-
-					text() {
-						const textNode = new Text();
-						this.watch(newValue => textNode.textContent = newValue);
-						return [textNode];
+				},
+				abort(watcherFn) {
+					delete watchers[watcherMap.get(watcherFn).index || -1]
+				},
+				until(value) {
+					let watcherFn;
+					return new Promise(resolveWait => this.watch(watcherFn = newValue => {
+						if(typeof value == "function" ? value(newValue) : newValue === value) {
+							this.abort(watcherFn);
+							resolveWait(newValue);
+						};
+					}))
+				},
+				get setter() {
+					return setterFn
+				},
+				get $() {
+					return value
+				},
+				set $(newValue) {
+					newValue = setterFn(newValue);
+					if(newValue instanceof Promise) {
+						newValue.then(afterResolved)
+					} else if(value !== newValue) {
+						value = newValue;
+						watchers.forEach(execWatcher)
 					}
 				},
-				typeof value == "boolean" ? BOOL_TEMP : undefined,
-			)
+
+				into,
+
+				text() {
+					const textNode = new Text();
+					this.watch(newValue => textNode.textContent = newValue);
+					return [textNode];
+				}
+			},
+			typeof value == "boolean" ? BOOL_TEMP : undefined,
+		)
 	}
 ;
 
