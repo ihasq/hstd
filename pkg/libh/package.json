@@ -1,12 +1,9 @@
 {
   "name": "libh",
   "version": "0.0.61",
-  "description": "blazingly fast vdom alternative ahh javascript",
+  "description": "simple library to build reactive, extensive, reusable web interface.",
   "type": "module",
   "main": "src/mod.js",
-  "directories": {
-    "test": "test"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "release": "esbuild --minify --bundle --format=esm ./src/mod.js > ./docs/libh.min.js"
