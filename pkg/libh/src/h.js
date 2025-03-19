@@ -51,9 +51,9 @@ const
 
 export const h = (s, ...v) => {
 
-	let elementTemp = elementTempMap.get(s);
+	let createElementTemp = elementTempMap.get(s);
 
-	if(!elementTemp) {
+	if(!createElementTemp) {
 
 		let joined = s.join(""), tokenBuf, replacementCounter = 0;
 		while(joined.includes(tokenBuf = String.fromCharCode(...createToken()))) {};
@@ -69,12 +69,11 @@ export const h = (s, ...v) => {
 
 		node.innerHTML = joined.replaceAll(tokenBuf, (_, index) => (placeholder[replacementCounter++] = attrMatch.includes(index + TOKEN_LENGTH)) ? tokenBuf : `<br ${tokenBuf}>`);
 
-		elementTempMap.set(s, elementTemp = [node, placeholder, tokenBuf])
+		elementTempMap.set(s, createElementTemp = () => [node.cloneNode(!0), placeholder, tokenBuf])
 	};
 
 	const
-		[node, placeholder, tokenBuf] = elementTemp,
-		newNode = node.cloneNode(true),
+		[newNode, placeholder, tokenBuf] = createElementTemp(),
 		id = {}
 	;
 
@@ -119,7 +118,7 @@ export const h = (s, ...v) => {
 								attrValue.$ = value
 								attrValue.ignore.delete(oninput);
 
-							}), { passive: true })
+							}), { passive: !0 })
 
 						} else {
 

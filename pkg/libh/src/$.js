@@ -57,7 +57,6 @@ const
 		}
 	},
 	publishedPtr = {},
-	// propCache = { swap: true, swapOf: true, into: true },
 	$ = (value, setterFn = setterFnTemp, options) => {
 		const
 			description = resolverSignature + (options?.name || ""),
@@ -129,10 +128,10 @@ const
 				},
 				ignore: {
 					set(watcherFn) {
-						watcherIgnoreList.set(watcherFn, true);
+						watcherIgnoreList.set(watcherFn, !0);
 					},
 					delete(watcherFn) {
-						watcherIgnoreList.set(watcherFn, false);
+						watcherIgnoreList.set(watcherFn, !1);
 					},
 				},
 				abort(watcherFn) {
