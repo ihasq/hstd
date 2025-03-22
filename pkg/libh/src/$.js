@@ -12,32 +12,32 @@ const
 			
 	// 	}
 	// },
-	ARR_TEMP = {
-		/**
-		 * 
-		 * @param { number } a 
-		 * @param { number } b 
-		 */
-		swap(a, b) {
-			let buf = this[a];
-			this[a] = this[b];
-			this[b] = buf;
-			return this;
-		},
+	// ARR_TEMP = {
+	// 	/**
+	// 	 * 
+	// 	 * @param { number } a 
+	// 	 * @param { number } b 
+	// 	 */
+	// 	swap(a, b) {
+	// 		let buf = this[a];
+	// 		this[a] = this[b];
+	// 		this[b] = buf;
+	// 		return this;
+	// 	},
 
-		/**
-		 * 
-		 * @param { any } a 
-		 * @param { any } b 
-		 */
-		swapOf(a, b) {
-			return this.swap(this.indexOf(a), this.indexOf(b))
-		},
+	// 	/**
+	// 	 * 
+	// 	 * @param { any } a 
+	// 	 * @param { any } b 
+	// 	 */
+	// 	swapOf(a, b) {
+	// 		return this.swap(this.indexOf(a), this.indexOf(b))
+	// 	},
 
-		into(transformerFn) {
+	// 	into(transformerFn) {
 
-		}
-	},
+	// 	}
+	// },
 	BOOL_TEMP = {
 		switch() {
 			this.$ = !this.$;
@@ -57,7 +57,10 @@ const
 		}
 	},
 	publishedPtr = {},
-	$ = (value, setterFn = setterFnTemp, options) => {
+	isPtr = (maybePtr) => maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER),
+
+	createPtr = (value, setterFn = setterFnTemp, options) => {
+
 		const
 			description = resolverSignature + (options?.name || ""),
 			symbol = Symbol(description),
@@ -70,8 +73,8 @@ const
 			/**@type { { Function[] } } */
 			watchers = [],
 
-			/**@type { { callback: Function, timeout: number }[] } */
-			timeoutedWatchers = [],
+			// /**@type { { callback: Function, timeout: number }[] } */
+			// timeoutedWatchers = [],
 
 			watcherMap = new WeakMap(),
 			watcherIgnoreList = new WeakMap()
@@ -172,7 +175,35 @@ const
 			},
 			typeof value == "boolean" ? BOOL_TEMP : undefined,
 		)
-	}
+	},
+
+	createTemplate = (s, v) => {
+
+		const temp = [];
+
+		s.forEach((sBuf, sIndex) => temp[sIndex * 2] = sBuf);
+
+		v.forEach((vBuf, vIndex) => {
+			const tempIndex = (vIndex * 2) + 1;
+			temp[tempIndex] = isPtr(vBuf)
+				? (vBuf.watch(newValue => {
+					temp[tempIndex] = newValue;
+					ptr.$ = temp.join("")
+				}), vBuf.$)
+				: String(vBuf)
+		})
+
+		const ptr = createPtr(temp.join(""));
+
+		return ptr;
+
+	},
+
+	isFrozenArray = (x) => Array.isArray(x) && Object.isFrozen(x),
+
+	$ = (s, ...v) => isFrozenArray(s) && isFrozenArray(s.raw)
+		? createTemplate(s, v)
+		: createPtr(s, ...v)
 ;
 
 let resolverSignature;
@@ -192,4 +223,4 @@ Object_defineProperty(globalThis, resolverSignature, {
  * @param { object } options 
  * @returns { object }
  */
-export { $ };
+export { $, isPtr };

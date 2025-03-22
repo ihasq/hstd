@@ -1,8 +1,8 @@
+import { isPtr } from "./$.js";
+
 const
 
 	TOKEN_LENGTH = 16,
-
-	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 	HTML_IDENTIFIER = Symbol.for("HTML_IDENTIFIER"),
 
 	createToken = function*(length = TOKEN_LENGTH) {
@@ -36,8 +36,6 @@ const
 			;
 		}
 	},
-
-	isPtr = (maybePtr) => maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER),
 
 	bindResolver = (resolver, buf) => Reflect.ownKeys(buf).forEach(resolver.bind(!1, buf))
 ;
