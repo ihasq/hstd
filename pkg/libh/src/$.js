@@ -38,15 +38,29 @@ const
 
 	// 	}
 	// },
+	UNIVERSAL_TEMP = {
+		into(transformerFn) {
+
+			const
+				ptr = $(transformerFn(this.$)),
+				ancestor = this
+			;
+	
+			this.watch($ => ptr.$ = transformerFn($));
+	
+			return Object.assign(ptr, { ancestor });
+		},
+		refresh() {
+			this.$ = this.$
+		}
+	},
 	BOOL_TEMP = {
 		switch() {
 			this.$ = !this.$;
+		},
+		branch(ifTrue, ifFalse) {
+			return this.into(x => x ? ifTrue : ifFalse);
 		}
-	},
-	into = function(transformerFn) {
-		const ptr = $(transformerFn(this.$));
-		this.watch($ => ptr.$ = transformerFn($));
-		return ptr;
 	},
 	setterFnTemp = $ => $,
 	resolverSignatureGenCB = function*(length = 52) {
@@ -165,14 +179,13 @@ const
 					}
 				},
 
-				into,
-
 				text() {
 					const textNode = new Text(this.$);
 					this.watch(newValue => textNode.textContent = newValue);
 					return [textNode];
-				}
+				},
 			},
+			UNIVERSAL_TEMP,
 			typeof value == "boolean" ? BOOL_TEMP : undefined,
 		)
 	},
@@ -184,13 +197,16 @@ const
 		s.forEach((sBuf, sIndex) => temp[sIndex * 2] = sBuf);
 
 		v.forEach((vBuf, vIndex) => {
+
 			const tempIndex = (vIndex * 2) + 1;
+
 			temp[tempIndex] = isPtr(vBuf)
 				? (vBuf.watch(newValue => {
 					temp[tempIndex] = newValue;
 					ptr.$ = temp.join("")
 				}), vBuf.$)
 				: String(vBuf)
+
 		})
 
 		const ptr = createPtr(temp.join(""));
