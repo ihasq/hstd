@@ -247,8 +247,6 @@ Object_defineProperty(globalThis, resolverSignature, {
 	enumerable: !1
 });
 
-console.log(NUM_TEMP)
-
 /**
  * 
  * @param { number | string | any[] } value 
