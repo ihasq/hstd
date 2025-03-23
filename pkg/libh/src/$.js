@@ -1,9 +1,4 @@
 const
-	{
-		// Array: { isArray: Array_isArray },
-		Object: { assign: Object_assign, defineProperty: Object_defineProperty, freeze: Object_freeze },
-		globalThis: GLOBALTHIS
-	} = globalThis,
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 	// NUM_TEMP = {
 	// 	to(destination, duration, curve) {
@@ -136,7 +131,7 @@ const
 					;
 				}
 			})
-		: */Object_assign(
+		: */Object.assign(
 			{
 				[Symbol.toPrimitive](hint) {
 					return (typeof hint) == "symbol" ? hint === PTR_IDENTIFIER : symbol;
@@ -239,9 +234,9 @@ const
 
 let resolverSignature;
 
-while((resolverSignature = String.fromCharCode(...resolverSignatureGenCB())) in globalThis) {};
+while((resolverSignature = String.fromCharCode(...resolverSignatureGenCB())) in globalThis);
 
-Object_defineProperty(globalThis, resolverSignature, {
+Object.defineProperty(globalThis, resolverSignature, {
 	value: (symbol) => publishedPtr[symbol],
 	configurable: !1,
 	enumerable: !1

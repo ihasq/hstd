@@ -54,7 +54,7 @@ export const h = (s, ...v) => {
 	if(!createElementTemp) {
 
 		let joined = s.join(""), tokenBuf, replacementCounter = 0;
-		while(joined.includes(tokenBuf = String.fromCharCode(...createToken()))) {};
+		while(joined.includes(tokenBuf = String.fromCharCode(...createToken())));
 		joined = s.join(tokenBuf);
 
 		const
