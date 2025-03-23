@@ -4,7 +4,6 @@ const
 		Object: { assign: Object_assign, defineProperty: Object_defineProperty, freeze: Object_freeze },
 		globalThis: GLOBALTHIS
 	} = globalThis,
-	RAF = GLOBALTHIS.requestAnimationFrame,
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 	// NUM_TEMP = {
 	// 	to(destination, duration, curve) {
@@ -54,14 +53,26 @@ const
 			this.$ = this.$
 		}
 	},
-	BOOL_TEMP = {
+	createPrimitiveTemplate = ({ prototype }, base = {}) => Object.assign(
+		base,
+		...Reflect.ownKeys(prototype)
+			.filter(x => x != "constructor")
+			.map(x => ({
+				[x](...args) {
+					this.into(newValue => newValue[x].apply(newValue, args))
+				}
+			}))
+	),
+	BOOL_TEMP = createPrimitiveTemplate(Boolean, {
 		switch() {
 			this.$ = !this.$;
 		},
 		branch(ifTrue, ifFalse) {
 			return this.into(x => x ? ifTrue : ifFalse);
 		}
-	},
+	}),
+	NUM_TEMP = createPrimitiveTemplate(Number),
+	STR_TEMP = createPrimitiveTemplate(String),
 	setterFnTemp = $ => $,
 	resolverSignatureGenCB = function*(length = 52) {
 		let buf;
@@ -76,6 +87,7 @@ const
 	createPtr = (value, setterFn = setterFnTemp, options) => {
 
 		const
+			typeofValue = typeof value,
 			description = resolverSignature + (options?.name || ""),
 			symbol = Symbol(description),
 			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
@@ -170,6 +182,7 @@ const
 					return value
 				},
 				set $(newValue) {
+					if(typeof newValue !== typeofValue) return;
 					newValue = setterFn(newValue);
 					if(newValue instanceof Promise) {
 						newValue.then(afterResolved)
@@ -186,7 +199,9 @@ const
 				},
 			},
 			UNIVERSAL_TEMP,
-			typeof value == "boolean" ? BOOL_TEMP : undefined,
+			typeofValue == "boolean" ? BOOL_TEMP : !1,
+			typeofValue == "number" ? NUM_TEMP : !1,
+			typeofValue == "string" ? STR_TEMP : !1,
 		)
 	},
 
@@ -231,6 +246,8 @@ Object_defineProperty(globalThis, resolverSignature, {
 	configurable: !1,
 	enumerable: !1
 });
+
+console.log(NUM_TEMP)
 
 /**
  * 
