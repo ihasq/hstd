@@ -59,7 +59,7 @@ const
 			.filter(x => x != "constructor")
 			.map(x => ({
 				[x](...args) {
-					this.into(newValue => newValue[x].apply(newValue, args))
+					return this.into(newValue => newValue[x].apply(newValue, args))
 				}
 			}))
 	),
