@@ -1,6 +1,6 @@
 {
   "name": "libh",
-  "version": "0.0.66",
+  "version": "0.0.67",
   "description": "simple library to build reactive, extensive, reusable web interface.",
   "type": "module",
   "main": "src/mod.js",
