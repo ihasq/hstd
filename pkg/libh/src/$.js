@@ -58,16 +58,18 @@ const
 				}
 			}))
 	),
-	BOOL_TEMP = createPrimitiveTemplate(Boolean, {
-		switch() {
-			this.$ = !this.$;
-		},
-		branch(ifTrue, ifFalse) {
-			return this.into(x => x ? ifTrue : ifFalse);
-		}
-	}),
-	NUM_TEMP = createPrimitiveTemplate(Number),
-	STR_TEMP = createPrimitiveTemplate(String),
+	TEMP = {
+		boolean: createPrimitiveTemplate(Boolean, {
+			switch() {
+				this.$ = !this.$;
+			},
+			branch(ifTrue, ifFalse) {
+				return this.into(x => x ? ifTrue : ifFalse);
+			}
+		}),
+		number: createPrimitiveTemplate(Number),
+		string: createPrimitiveTemplate(String)
+	},
 	setterFnTemp = $ => $,
 	resolverSignatureGenCB = function*(length = 52) {
 		let buf;
@@ -77,7 +79,31 @@ const
 		}
 	},
 	publishedPtr = {},
-	isPtr = (maybePtr) => maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER),
+	isPtr = (maybePtr) => !!(maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)),
+
+	createPrimitivePtr = () => {
+
+	},
+
+	createObjectPtr = (obj) => {
+		const propCache = {}
+		return new Proxy(obj, {
+			get(target, prop) {
+				let ptr = propCache[prop];
+				if(!ptr) {
+					ptr = propCache[prop] = $("");
+				}
+				return ptr;
+			},
+			set(target, prop, value) {
+				if(isPtr(value)) {
+					value.watch(x => target[prop] = x)
+				} else {
+					target[prop] = value;
+				}
+			}
+		});
+	},
 
 	createPtr = (value, setterFn = setterFnTemp, options) => {
 
@@ -194,9 +220,7 @@ const
 				},
 			},
 			UNIVERSAL_TEMP,
-			typeofValue == "boolean" ? BOOL_TEMP : !1,
-			typeofValue == "number" ? NUM_TEMP : !1,
-			typeofValue == "string" ? STR_TEMP : !1,
+			TEMP[typeofValue]
 		)
 	},
 
@@ -229,6 +253,8 @@ const
 
 	$ = (s, ...v) => isFrozenArray(s) && isFrozenArray(s.raw)
 		? createTemplate(s, v)
+		: "function object".includes(typeof x)
+		? createObjectPtr(s)
 		: createPtr(s, ...v)
 ;
 
