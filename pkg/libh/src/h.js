@@ -110,13 +110,13 @@ export const h = (s, ...v) => {
 							const oninput = $ => ref[attrProp] = $;
 							attrValue.watch(oninput);
 
-							ref.addEventListener("input", ({ target: { [attrProp]: value } }) => setTimeout(() => {
+							ref.addEventListener("input", ({ target: { [attrProp]: value } }) => {
 
 								attrValue.ignore.set(oninput);
 								attrValue.$ = value
 								attrValue.ignore.delete(oninput);
 
-							}), { passive: !0 })
+							}, { passive: !0 })
 
 						} else {
 

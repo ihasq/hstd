@@ -27,16 +27,21 @@
 		@font-face {
 			font-family: 'jbm';
 			src: url(./resources/JetBrainsMono-Bold.ttf);
+			font-display: swap;
 		}
 
 		@font-face {
 			font-family: "int";
-			src: url(./resources/Inter_24pt-Medium.ttf)
+			src: url(./resources/Inter_24pt-Medium.ttf);
+			font-display: swap;
 		}
 	</style>
 	<script type="module">
 		import main from "./main.js";
-		document.body.append(...main())
+		document.body.append(...main());
+		await document.fonts.ready;
+		document.body.hidden = false;
 	</script>
 </head>
+<body hidden></body>
 </html>

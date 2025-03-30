@@ -1,37 +1,5 @@
 const
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
-	// NUM_TEMP = {
-	// 	to(destination, duration, curve) {
-	// 		if(!RAF) return this;
-			
-	// 	}
-	// },
-	// ARR_TEMP = {
-	// 	/**
-	// 	 * 
-	// 	 * @param { number } a 
-	// 	 * @param { number } b 
-	// 	 */
-	// 	swap(a, b) {
-	// 		let buf = this[a];
-	// 		this[a] = this[b];
-	// 		this[b] = buf;
-	// 		return this;
-	// 	},
-
-	// 	/**
-	// 	 * 
-	// 	 * @param { any } a 
-	// 	 * @param { any } b 
-	// 	 */
-	// 	swapOf(a, b) {
-	// 		return this.swap(this.indexOf(a), this.indexOf(b))
-	// 	},
-
-	// 	into(transformerFn) {
-
-	// 	}
-	// },
 	UNIVERSAL_TEMP = {
 		into(transformerFn) {
 
@@ -54,6 +22,7 @@ const
 			.filter(x => x != "constructor")
 			.map(x => ({
 				[x](...args) {
+					// args.forEach(arg => isPtr(arg) ? )
 					return this.into(newValue => newValue[x].apply(newValue, args))
 				}
 			}))
@@ -108,9 +77,9 @@ const
 	createPtr = (value, setterFn = setterFnTemp, options) => {
 
 		const
-			typeofValue = typeof value,
 			description = resolverSignature + (options?.name || ""),
 			symbol = Symbol(description),
+			typeofValue = typeof value,
 			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
 			afterResolved = resolvedNewValue => {
 				value = resolvedNewValue
@@ -119,9 +88,6 @@ const
 
 			/**@type { { Function[] } } */
 			watchers = [],
-
-			// /**@type { { callback: Function, timeout: number }[] } */
-			// timeoutedWatchers = [],
 
 			watcherMap = new WeakMap(),
 			watcherIgnoreList = new WeakMap()
@@ -168,20 +134,15 @@ const
 					return symbol
 				},
 				watch(watcherFn, timeout) {
-					// if(typeof timeout == "number") {
-					// 	const id = setTimeout(() => watcherFn(value), timeout);
-					// } else {
-					// 	watcherFn(value);
-					// }
 					watcherMap.set(watcherFn, { index: watchers.push(watcherFn) - 1, timeout });
 					return this;
 				},
 				ignore: {
 					set(watcherFn) {
-						watcherIgnoreList.set(watcherFn, !0);
+						watcherIgnoreList.set(watcherFn, !1);
 					},
 					delete(watcherFn) {
-						watcherIgnoreList.set(watcherFn, !1);
+						watcherIgnoreList.set(watcherFn, !0);
 					},
 				},
 				abort(watcherFn) {
@@ -195,9 +156,6 @@ const
 							resolveWait(newValue);
 						};
 					}))
-				},
-				get setter() {
-					return setterFn
 				},
 				get $() {
 					return value
