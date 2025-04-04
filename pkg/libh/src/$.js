@@ -186,6 +186,10 @@ const
 					return typeofValue;
 				},
 
+				get length() {
+					return this.into($ => String($).length)
+				},
+
 				text() {
 					const textNode = new Text(this.$);
 					this.watch(newValue => textNode.textContent = newValue);
