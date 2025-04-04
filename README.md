@@ -110,35 +110,6 @@ function Canvas() {
 }
 ```
 
-### Draggable List
-```javascript
-function Canvas() {
-
-    const customers = $([]);
-
-    const name = $(""), email = $("");
-
-    return html`
-        <ul>${customers.into(({ name, email }, ref) => html`
-            <li>name: ${name}, email: ${email}</li>
-            <button ${{
-                [on.click]() {
-                    ref.removeOf(this[html])
-                }
-            }}>x</button>
-        `, { sync: true, draggable: true })}</ul>
-        <input ${{ value: name, type: "string" }}>
-        <input ${{ value: email, type: "email" }}>
-
-        <button ${{ [on.click]: () => {
-            customers.push({ name: name.$, email: email.$ });
-            name.$ = "";
-            email.$ = "";
-        } }}>submit</button>
-    `
-}
-```
-
 ## Demo
 + [Passcore](https://ihasq.com/passcore) - Random Password Generator ([code](https://github.com/ihasq/passcore))
 
