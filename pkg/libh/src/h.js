@@ -113,7 +113,7 @@ export const h = (s, ...v) => {
 							ref.addEventListener("input", ({ target: { [attrProp]: value } }) => {
 
 								attrValue.ignore.set(oninput);
-								attrValue.$ = value
+								attrValue.$ = "number\0range".includes(ref.type) ? Number(value) : value;
 								attrValue.ignore.delete(oninput);
 
 							}, { passive: !0 })

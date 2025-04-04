@@ -161,8 +161,8 @@ const
 					return value
 				},
 				set $(newValue) {
-					if(typeof newValue !== typeofValue) return;
 					newValue = setterFn(newValue);
+					if(typeof newValue !== typeofValue) return;
 					if(newValue instanceof Promise) {
 						newValue.then(afterResolved)
 					} else if(value !== newValue) {
