@@ -58,14 +58,21 @@ export const h = (s, ...v) => {
 		joined = s.join(tokenBuf);
 
 		const
-			attrMatch = [...joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*?${tokenBuf}`, "g"))].map(({ 0: { length }, index }) => index + length),
+			attrMatch = [...joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*?${tokenBuf}`, "g"))]
+				.map(({ 0: { length }, index }) => index + length)
+			,
 			placeholder = [],
 			node = document.createElement("div")
 		;
 
 		df.appendChild(node);
 
-		node.innerHTML = joined.replaceAll(tokenBuf, (_, index) => (placeholder[replacementCounter++] = attrMatch.includes(index + TOKEN_LENGTH)) ? tokenBuf : `<br ${tokenBuf}>`);
+		node.innerHTML = joined.replaceAll(
+			tokenBuf,
+			(_, index) => (placeholder[replacementCounter++] = attrMatch.includes(index + TOKEN_LENGTH))
+				? tokenBuf
+				: `<br ${tokenBuf}>`
+		);
 
 		elementTempMap.set(s, createElementTemp = () => [node.cloneNode(!0), placeholder, tokenBuf])
 	};

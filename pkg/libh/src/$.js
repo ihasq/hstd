@@ -4,13 +4,13 @@ const
 		into(transformerFn) {
 
 			const
-				ptr = $(transformerFn(this.$)),
-				ancestor = this
+				ptr = $(transformerFn(this.$), undefined),
+				parent = this
 			;
 	
 			this.watch($ => ptr.$ = transformerFn($));
 	
-			return Object.assign(ptr, { ancestor });
+			return Object.assign(ptr, { parent });
 		},
 		refresh() {
 			this.$ = this.$
@@ -23,7 +23,21 @@ const
 			.map(x => ({
 				[x](...args) {
 					// args.forEach(arg => isPtr(arg) ? )
-					return this.into(newValue => newValue[x].apply(newValue, args))
+					const
+						argsTemp = args.map((arg, argIndex) => {
+							const isArgPtr = isPtr(arg);
+							if(isArgPtr) {
+								arg.watch($ => {
+									argsTemp[argIndex] = $;
+									this.refresh();
+								})
+							}
+							return isArgPtr ? arg.$ : arg
+						}),
+						refreshTemp = newValue => newValue[x].apply(newValue, argsTemp),
+						transformedPtr = this.into(refreshTemp)
+					;
+					return transformedPtr;
 				}
 			}))
 	),
@@ -81,8 +95,9 @@ const
 			symbol = Symbol(description),
 			typeofValue = typeof value,
 			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
-			afterResolved = resolvedNewValue => {
-				value = resolvedNewValue
+			afterResolved = newValue => {
+				if(typeof newValue !== typeofValue) throw new TypeError(`Cannot set ${typeof newValue} value to ${typeofValue} pointer`);
+				value = newValue
 				watchers.forEach(execWatcher)
 			},
 
@@ -157,18 +172,18 @@ const
 						};
 					}))
 				},
+
 				get $() {
 					return value
 				},
 				set $(newValue) {
-					newValue = setterFn(newValue);
-					if(typeof newValue !== typeofValue) return;
-					if(newValue instanceof Promise) {
-						newValue.then(afterResolved)
-					} else if(value !== newValue) {
-						value = newValue;
-						watchers.forEach(execWatcher)
-					}
+					(newValue = setterFn(newValue)) instanceof Promise
+						? newValue.then(afterResolved)
+						: afterResolved(newValue)
+				},
+
+				get type() {
+					return typeofValue;
 				},
 
 				text() {
