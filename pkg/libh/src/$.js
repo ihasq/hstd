@@ -4,7 +4,7 @@ const
 		into(transformerFn) {
 
 			const
-				ptr = $(transformerFn(this.$), undefined),
+				ptr = createPtr(transformerFn(this.$), undefined),
 				parent = this
 			;
 	
@@ -19,27 +19,27 @@ const
 	createPrimitiveTemplate = ({ prototype }, base = {}) => Object.assign(
 		base,
 		...Reflect.ownKeys(prototype)
-			.filter(x => x != "constructor")
-			.map(x => ({
-				[x](...args) {
-					// args.forEach(arg => isPtr(arg) ? )
-					const
-						argsTemp = args.map((arg, argIndex) => {
-							const isArgPtr = isPtr(arg);
-							if(isArgPtr) {
-								arg.watch($ => {
-									argsTemp[argIndex] = $;
-									this.refresh();
-								})
-							}
-							return isArgPtr ? arg.$ : arg
-						}),
-						refreshTemp = newValue => newValue[x].apply(newValue, argsTemp),
-						transformedPtr = this.into(refreshTemp)
-					;
-					return transformedPtr;
+			.map(x => (x != "constructor") && (typeof prototype[x] == "function")
+				? {
+					[x](...args) {
+						const
+							argsTemp = args.map(
+								(arg, argIndex) => isPtr(arg)
+									? (arg.watch($ => {
+										argsTemp[argIndex] = $;
+										this.refresh();
+									}), arg.$)
+									: arg
+							)
+						;
+						return this.into(newValue => newValue[x].apply(
+							newValue,
+							argsTemp
+						))
+					}
 				}
-			}))
+				: !1
+			)
 	),
 	TEMP = {
 		boolean: createPrimitiveTemplate(Boolean, {
@@ -72,11 +72,7 @@ const
 		const propCache = {}
 		return new Proxy(obj, {
 			get(target, prop) {
-				let ptr = propCache[prop];
-				if(!ptr) {
-					ptr = propCache[prop] = $("");
-				}
-				return ptr;
+				return propCache[prop] ||= createPtr("");
 			},
 			set(target, prop, value) {
 				if(isPtr(value)) {
@@ -141,7 +137,11 @@ const
 		: */Object.assign(
 			{
 				[Symbol.toPrimitive](hint) {
-					return (typeof hint) == "symbol" ? hint === PTR_IDENTIFIER : symbol;
+					return (typeof hint) == "symbol"
+						? hint === PTR_IDENTIFIER
+						: typeofValue == "function" && hint == "string"
+						? symbol
+						: value;
 				},
 				publish() {
 					const symbol = Symbol(description);
@@ -199,7 +199,10 @@ const
 
 	createTemplate = (s, v) => {
 
-		const temp = [];
+		const
+			temp = [],
+			ptr = createPtr(temp.join(""))
+		;
 
 		s.forEach((sBuf, sIndex) => temp[sIndex * 2] = sBuf);
 
@@ -214,9 +217,7 @@ const
 				}), vBuf.$)
 				: String(vBuf)
 
-		})
-
-		const ptr = createPtr(temp.join(""));
+		});
 
 		return ptr;
 
