@@ -90,7 +90,7 @@ export default function() {
 				[css.margin]: "40px 0",
 				[css.fontFamily]: 'jbm'
 			}}>
-				lib${Link("https://libh.dev", "h")}
+				lib${Link("https://libh.js.org", "h")}
 			</h1>
 
 			<div ${{ [css.margin]: "0 0 20px" }}>
