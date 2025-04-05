@@ -14,7 +14,15 @@ const
 		},
 		refresh() {
 			this.$ = this.$
-		}
+		},
+		text() {
+			const textNode = new Text(this.$);
+			this.watch(newValue => textNode.textContent = newValue);
+			return [textNode];
+		},
+	},
+	applyNewValue = function (x, argsTemp, newValue) {
+		return newValue[x].apply(newValue, argsTemp)
 	},
 	createPrimitiveTemplate = ({ prototype }, base = {}) => Object.assign(
 		base,
@@ -27,15 +35,14 @@ const
 								(arg, argIndex) => isPtr(arg)
 									? (arg.watch($ => {
 										argsTemp[argIndex] = $;
-										this.refresh();
+										ptr.$ = bindedFn(this.$);
 									}), arg.$)
 									: arg
-							)
+							),
+							bindedFn = applyNewValue.bind(!1, x, argsTemp),
+							ptr = this.into(bindedFn)
 						;
-						return this.into(newValue => newValue[x].apply(
-							newValue,
-							argsTemp
-						))
+						return ptr
 					}
 				}
 				: !1
@@ -188,12 +195,6 @@ const
 
 				get length() {
 					return this.into($ => String($).length)
-				},
-
-				text() {
-					const textNode = new Text(this.$);
-					this.watch(newValue => textNode.textContent = newValue);
-					return [textNode];
 				},
 			},
 			UNIVERSAL_TEMP,
