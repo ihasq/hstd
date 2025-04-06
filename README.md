@@ -115,4 +115,4 @@ function Canvas() {
 
 ## License
 
-libh is [WTFPL](http://www.wtfpl.net/about/) licensed.
+libh is [WTFPL licensed](LICENSE).
