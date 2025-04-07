@@ -1,19 +1,22 @@
 const
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
+
+	BOOL_OP = {
+		or: (a, b) => a || b,
+		and: (a, b) => a && b,
+		xor: (a, b) => a ^ b
+	},
+
 	UNIVERSAL_TEMP = {
 		into(transformerFn) {
 
 			const
 				transformerResult = transformerFn(this.$),
-				isTransformerResultPromise = transformerResult instanceof Promise
-			;
-
-			const
+				isTransformerResultPromise = transformerResult instanceof Promise,
 				ptr = createPtr(isTransformerResultPromise
 					? undefined
 					: transformerResult
-				),
-				parent = this
+				)
 			;
 
 			isTransformerResultPromise ? transformerResult.then($ => ptr.$ = $) : 0;
@@ -24,9 +27,28 @@ const
 					? transformerResult.then($ => ptr.$ = $)
 					: (ptr.$ = transformerResult)
 			});
-	
-			return Object.assign(ptr, { parent });
+
+			return ptr;
 		},
+
+		...Object.fromEntries(Object.keys(BOOL_OP).map(x => [x, function(value) {
+
+			const
+				op = BOOL_OP[x],
+				isPtrCache = isPtr(value),
+				ptr = this.into($ => op($, (isPtrCache ? value.$ : value)))
+			;
+	
+			isPtrCache ? value.watch($ => ptr.$ = op(this.$, $)) : 0;
+	
+			return ptr;
+	
+		}])),
+
+		not() {
+			return this.into($ => !$)
+		},
+
 		refresh() {
 			this.$ = this.$
 		},
@@ -72,31 +94,31 @@ const
 			},
 
 			branch(ifTrue, ifFalse) {
-				return this.into(x => x ? ifTrue : ifFalse);
+				return this.into($ => $ ? ifTrue : ifFalse);
 			},
 
-			not() {
-				return this.into($ => !$)
-			},
+			// not() {
+			// 	return this.into($ => !$)
+			// },
 			
-			and(bool) {
+			// and(bool) {
 
-				const
-					isBoolPtr = isPtr(bool),
-					ptr = this.into($ => $ && (isBoolPtr ? bool.$ : bool))
-				;
+			// 	const
+			// 		isBoolPtr = isPtr(bool),
+			// 		ptr = this.into($ => $ && (isBoolPtr ? bool.$ : bool))
+			// 	;
 
-				isBoolPtr ? bool.watch($ => ptr.$ = (this.$ && $)) : 0;
-				return ptr;
-			},
+			// 	isBoolPtr ? bool.watch($ => ptr.$ = (this.$ && $)) : 0;
+			// 	return ptr;
+			// },
 
-			or(bool) {
-				return this.not().and(bool?.not?.() || !bool).not()
-			},
+			// or(bool) {
+			// 	return this.not().and(bool?.not?.() || !bool).not()
+			// },
 
-			xor(bool) {
-				return this.or(bool).and(this.and(bool).not())
-			},
+			// xor(bool) {
+			// 	return this.or(bool).and(this.and(bool).not())
+			// },
 
 		}),
 		number: createPrimitiveTemplate(Number),
@@ -237,7 +259,7 @@ const
 
 				get length() {
 					return this.into($ => String($).length)
-				},
+				}
 			},
 			UNIVERSAL_TEMP,
 			TEMP[typeofValue]
