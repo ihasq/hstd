@@ -66,12 +66,38 @@ const
 	),
 	TEMP = {
 		boolean: createPrimitiveTemplate(Boolean, {
+
 			switch() {
 				this.$ = !this.$;
 			},
+
 			branch(ifTrue, ifFalse) {
 				return this.into(x => x ? ifTrue : ifFalse);
-			}
+			},
+
+			not() {
+				return this.into($ => !$)
+			},
+			
+			and(bool) {
+
+				const
+					isBoolPtr = isPtr(bool),
+					ptr = this.into($ => $ && (isBoolPtr ? bool.$ : bool))
+				;
+
+				isBoolPtr ? bool.watch($ => ptr.$ = (this.$ && $)) : 0;
+				return ptr;
+			},
+
+			or(bool) {
+				return this.not().and(bool?.not?.() || !bool).not()
+			},
+
+			xor(bool) {
+				return this.or(bool).and(this.and(bool).not())
+			},
+
 		}),
 		number: createPrimitiveTemplate(Number),
 		string: createPrimitiveTemplate(String)
