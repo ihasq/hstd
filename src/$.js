@@ -4,11 +4,26 @@ const
 		into(transformerFn) {
 
 			const
-				ptr = createPtr(transformerFn(this.$), undefined),
+				transformerResult = transformerFn(this.$),
+				isTransformerResultPromise = transformerResult instanceof Promise
+			;
+
+			const
+				ptr = createPtr(isTransformerResultPromise
+					? undefined
+					: transformerResult
+				),
 				parent = this
 			;
+
+			isTransformerResultPromise ? transformerResult.then($ => ptr.$ = $) : 0;
 	
-			this.watch($ => ptr.$ = transformerFn($));
+			this.watch($ => {
+				const transformerResult = transformerFn($);
+				transformerResult instanceof Promise
+					? transformerResult.then($ => ptr.$ = $)
+					: (ptr.$ = transformerResult)
+			});
 	
 			return Object.assign(ptr, { parent });
 		},
@@ -31,8 +46,9 @@ const
 				? {
 					[x](...args) {
 						const
+							protoFnLength = prototype[x].length,
 							argsTemp = args.map(
-								(arg, argIndex) => isPtr(arg)
+								(arg, argIndex) => (argIndex < protoFnLength) && isPtr(arg)
 									? (arg.watch($ => {
 										argsTemp[argIndex] = $;
 										ptr.$ = bindedFn(this.$);
