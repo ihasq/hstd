@@ -1,12 +1,6 @@
 const
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
-	BOOL_OP = {
-		or: (a, b) => a || b,
-		and: (a, b) => a && b,
-		xor: (a, b) => a ^ b
-	},
-
 	UNIVERSAL_TEMP = {
 		into(transformerFn) {
 
@@ -31,7 +25,13 @@ const
 			return ptr;
 		},
 
-		...Object.fromEntries(Object.entries(BOOL_OP).map(([key, fn]) => [key, function(value) {
+		...Object.assign.apply(!1, [
+
+			["or", (a, b) => a || b],
+			["and", (a, b) => a && b],
+			["xor", (a, b) => a ^ b]
+
+		].map(([key, fn]) => ({ [key](value) {
 
 			const
 				isPtrCache = isPtr(value),
@@ -42,7 +42,7 @@ const
 	
 			return ptr;
 	
-		}])),
+		}}))),
 
 		not() {
 			return this.into($ => !$)
@@ -96,29 +96,6 @@ const
 				return this.into($ => $ ? ifTrue : ifFalse);
 			},
 
-			// not() {
-			// 	return this.into($ => !$)
-			// },
-			
-			// and(bool) {
-
-			// 	const
-			// 		isBoolPtr = isPtr(bool),
-			// 		ptr = this.into($ => $ && (isBoolPtr ? bool.$ : bool))
-			// 	;
-
-			// 	isBoolPtr ? bool.watch($ => ptr.$ = (this.$ && $)) : 0;
-			// 	return ptr;
-			// },
-
-			// or(bool) {
-			// 	return this.not().and(bool?.not?.() || !bool).not()
-			// },
-
-			// xor(bool) {
-			// 	return this.or(bool).and(this.and(bool).not())
-			// },
-
 		}),
 		number: createPrimitiveTemplate(Number),
 		string: createPrimitiveTemplate(String)
@@ -157,9 +134,11 @@ const
 	createPtr = (value, setterFn = setterFnTemp, options) => {
 
 		const
+
 			description = resolverSignature + (options?.name || ""),
 			symbol = Symbol(description),
 			typeofValue = typeof value,
+
 			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
 			afterResolved = newValue => {
 				if(typeof newValue !== typeofValue) throw new TypeError(`Cannot set ${typeof newValue} value to ${typeofValue} pointer`);
@@ -318,3 +297,63 @@ Object.defineProperty(globalThis, resolverSignature, {
  * @returns { object }
  */
 export { $, isPtr };
+
+// const getTypeof = value => typeof value;
+
+// const into = function(transformerFn) {
+
+// 	const
+// 		transformerResult = transformerFn(this.$),
+// 		isTransformerResultPromise = transformerResult instanceof Promise,
+// 		ptr = createPtr(isTransformerResultPromise
+// 			? undefined
+// 			: transformerResult
+// 		)
+// 	;
+
+// 	isTransformerResultPromise ? transformerResult.then($ => ptr.$ = $) : 0;
+
+// 	this.watch($ => {
+// 		const transformerResult = transformerFn($);
+// 		transformerResult instanceof Promise
+// 			? transformerResult.then($ => ptr.$ = $)
+// 			: (ptr.$ = transformerResult)
+// 	});
+
+// 	return ptr;
+// }
+
+// const newPtr = (value, setterFn, options) => {
+
+// 	let
+// 		typeofValue = typeof value,
+// 		valuePrototype = Object.getPrototypeOf(value)
+// 	;
+
+// 	return new Proxy({}, {
+// 		get(_, prop) {
+// 			const valueProperty = valuePrototype[prop];
+// 			if(getTypeof(valueProperty) == "function") {
+// 				const
+// 					{ length } = valueProperty,
+// 					bindedMethod = valueProperty.bind(value)
+// 				;
+// 				return function(...args) {
+// 					const argMap = args.map(arg => isPtr(arg)
+// 						// ? 
+// 					)
+// 				}
+// 			}
+// 		},
+// 		set(_, prop, newValue) {
+// 			if(prop === "$") {
+// 				const typeofNewValue = typeof newValue;
+// 				if(typeofNewValue !== typeofValue) {
+// 					valuePrototype = Object.getPrototypeOf(value)
+// 				}
+// 				value = setterFn(value)
+// 				return;
+// 			}
+// 		}
+// 	})
+// }
