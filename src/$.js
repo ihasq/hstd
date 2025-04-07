@@ -31,15 +31,14 @@ const
 			return ptr;
 		},
 
-		...Object.fromEntries(Object.keys(BOOL_OP).map(x => [x, function(value) {
+		...Object.fromEntries(Object.entries(BOOL_OP).map(([key, fn]) => [key, function(value) {
 
 			const
-				op = BOOL_OP[x],
 				isPtrCache = isPtr(value),
-				ptr = this.into($ => op($, (isPtrCache ? value.$ : value)))
+				ptr = this.into($ => fn($, (isPtrCache ? value.$ : value)))
 			;
 	
-			isPtrCache ? value.watch($ => ptr.$ = op(this.$, $)) : 0;
+			isPtrCache ? value.watch($ => ptr.$ = fn(this.$, $)) : 0;
 	
 			return ptr;
 	
