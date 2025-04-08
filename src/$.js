@@ -1,106 +1,7 @@
 const
-	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
-	UNIVERSAL_TEMP = {
-		into(transformerFn) {
+	publishedPtr = {},
 
-			const
-				transformerResult = transformerFn(this.$),
-				isTransformerResultPromise = transformerResult instanceof Promise,
-				ptr = createPtr(isTransformerResultPromise
-					? undefined
-					: transformerResult
-				)
-			;
-
-			isTransformerResultPromise ? transformerResult.then($ => ptr.$ = $) : 0;
-	
-			this.watch($ => {
-				const transformerResult = transformerFn($);
-				transformerResult instanceof Promise
-					? transformerResult.then($ => ptr.$ = $)
-					: (ptr.$ = transformerResult)
-			});
-
-			return ptr;
-		},
-
-		...Object.assign.apply(!1, [
-
-			["or", (a, b) => a || b],
-			["and", (a, b) => a && b],
-			["xor", (a, b) => a ^ b]
-
-		].map(([key, fn]) => ({ [key](value) {
-
-			const
-				isPtrCache = isPtr(value),
-				ptr = this.into($ => fn($, (isPtrCache ? value.$ : value)))
-			;
-	
-			isPtrCache ? value.watch($ => ptr.$ = fn(this.$, $)) : 0;
-	
-			return ptr;
-	
-		}}))),
-
-		not() {
-			return this.into($ => !$)
-		},
-
-		refresh() {
-			this.$ = this.$
-		},
-		text() {
-			const textNode = new Text(this.$);
-			this.watch(newValue => textNode.textContent = newValue);
-			return [textNode];
-		},
-	},
-	applyNewValue = function (x, argsTemp, newValue) {
-		return newValue[x].apply(newValue, argsTemp)
-	},
-	createPrimitiveTemplate = ({ prototype }, base = {}) => Object.assign(
-		base,
-		...Reflect.ownKeys(prototype)
-			.map(x => (x != "constructor") && (typeof prototype[x] == "function")
-				? {
-					[x](...args) {
-						const
-							protoFnLength = prototype[x].length,
-							argsTemp = args.map(
-								(arg, argIndex) => (argIndex < protoFnLength) && isPtr(arg)
-									? (arg.watch($ => {
-										argsTemp[argIndex] = $;
-										ptr.$ = bindedFn(this.$);
-									}), arg.$)
-									: arg
-							),
-							bindedFn = applyNewValue.bind(!1, x, argsTemp),
-							ptr = this.into(bindedFn)
-						;
-						return ptr
-					}
-				}
-				: !1
-			)
-	),
-	TEMP = {
-		boolean: createPrimitiveTemplate(Boolean, {
-
-			switch() {
-				this.$ = !this.$;
-			},
-
-			branch(ifTrue, ifFalse) {
-				return this.into($ => $ ? ifTrue : ifFalse);
-			},
-
-		}),
-		number: createPrimitiveTemplate(Number),
-		string: createPrimitiveTemplate(String)
-	},
-	setterFnTemp = $ => $,
 	resolverSignatureGenCB = function*(length = 52) {
 		let buf;
 		for(let i = 0; i < length; i++) {
@@ -108,182 +9,192 @@ const
 			yield 0x7f + buf + (buf > 0x8d) + (buf > 0x9c)
 		}
 	},
-	publishedPtr = {},
-	isPtr = (maybePtr) => !!(maybePtr?.[Symbol.toPrimitive]?.(PTR_IDENTIFIER)),
 
-	createPrimitivePtr = () => {
+	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
+	UNDEFINED = Symbol("UNDEFINED"),
+
+	boolOps = {
+		or: (a, b) => a || b,
+		and: (a, b) => a && b,
+		xor: (a, b) => a ^ b
 	},
 
-	createObjectPtr = (obj) => {
-		const propCache = {}
-		return new Proxy(obj, {
-			get(target, prop) {
-				return propCache[prop] ||= createPtr("");
+	opTemp = Object.assign(
+
+		{
+
+			[Symbol.toPrimitive](_, hint) {
+				return hint === PTR_IDENTIFIER
 			},
-			set(target, prop, value) {
-				if(isPtr(value)) {
-					value.watch(x => target[prop] = x)
-				} else {
-					target[prop] = value;
+
+			watch(buffer, watcherFn) {
+				if(watcherFn) {
+					buffer[2].set(watcherFn, [
+						buffer[1].push(watcherFn) - 1,
+						!0
+					])
+				};
+				return this;
+			},
+
+			abort(buffer, watcherFn) {
+				if(watcherFn) {
+					const info = buffer[2].get(watcherFn);
+					info[1] = !1;
+					delete buffer[1][info?.[0]];
+				};
+				return this;
+			},
+
+			into(buffer, transformerFn = $ => $) {
+				const newPtr = createPtr(transformerFn(buffer[0]))
+				this.watch($ => newPtr.$ = transformerFn($));
+				return newPtr;
+			},
+
+			until(_, value) {
+				return new Promise(r => {
+					const watcherFn = $ => (typeof value == "function" ? value($) : $ === value)
+						? (this.abort(watcherFn), r(this))
+						: !1
+					;
+					this.watch(watcherFn);
+				})
+			},
+
+			switch() {
+				this.$ = !this.$;
+				return this;
+			},
+
+			not() {
+				return this.into($ => !$)
+			},
+
+			bool() {
+				return this.into($ => !!$)
+			},
+
+			toString(_, base) {
+				return this.into($ => Number($).toString(base))
+			},
+
+			publish(buffer) {
+				const symbol = Symbol(buffer[3]);
+				publishedPtr[symbol] = this;
+				return symbol;
+			},
+
+			text() {
+				const text = new Text(this.$);
+				this.watch($ => text.textContent = $);
+				return [text]
+			}
+		},
+
+		...Object.keys(boolOps).map(op => ({
+			[op](_, value) {
+
+				const
+					isPtrCache = isPtr(value),
+					boolOp = boolOps[op],
+					ptr = this.into($ => boolOp($, isPtrCache ? value.$ : value))
+				;
+
+				isPtrCache ? value.watch($ => ptr.$ = boolOp(this.$, $)) : 0;
+
+				return ptr;
+
+			}
+		}))
+
+	),
+
+	isPtr = (ptr) => ptr?.[PTR_IDENTIFIER],
+
+	createPtr = (value, setter = $ => $, options = {}) => {
+
+		const
+			watchers = [],
+			watcherInfo = new WeakMap(),
+			formattedOptions = Object.assign({ name: "$" }, options),
+			execWatcher = function (value, force, ptr) {
+				force || (value !== buffer[0])
+					? (buffer[0] = value, watchers.forEach(fn => watcherInfo.get(fn)?.[1] ? fn(value) : 0))
+					: 0
+				;
+				return ptr;
+			},
+			buffer = [
+				value,
+				watchers,
+				watcherInfo,
+				signature + (options.name || ""),
+			]
+		;
+
+		return new Proxy(
+
+			Object.defineProperties(Object(function(...args) {
+
+				const [tmp] = buffer;
+
+				return typeof tmp == "function" ? tmp.apply(null, args) : tmp;
+
+			}), { name: { value: formattedOptions.name } }),
+
+			{
+				get(_, prop, reciever) {
+
+					const [tmp] = buffer;
+
+					let buf = (
+						prop === "$" ? tmp
+						: prop === "refresh" ? execWatcher.bind(null, tmp, !0, reciever)
+						: prop === PTR_IDENTIFIER ? !0
+						: (opTemp[prop]?.bind?.(reciever, buffer) || (
+							typeof tmp[prop] != "function"
+								? reciever.into($ => $[prop])
+								: UNDEFINED
+						))
+					);
+
+					if(buf === UNDEFINED) {
+						const ptrBuf = createPtr()
+						buf = function(...args) {
+							reciever.watch($ => ptrBuf.$ = $[prop](...args))
+							const argMap = args.map((arg, i) => isPtr(arg)
+								? (arg.watch($ => (argMap[i] = $, ptrBuf.$ = reciever.$[prop](...argMap))), arg.$)
+								: arg
+							);
+							ptrBuf.$ = tmp[prop].apply(tmp, argMap)
+							return ptrBuf
+						};
+					};
+
+					return buf;
+
+				},
+				set(_, prop, newValue) {
+					if(prop == "$") {
+						const tmp = setter(newValue);
+						tmp instanceof Promise ? tmp.then(execWatcher) : execWatcher(tmp)
+					}
+					return !0;
 				}
 			}
-		});
-	},
 
-	createPtr = (value, setterFn = setterFnTemp, options) => {
-
-		const
-
-			description = resolverSignature + (options?.name || ""),
-			symbol = Symbol(description),
-			typeofValue = typeof value,
-
-			execWatcher = watcherFn => watcherIgnoreList.get(watcherFn) ? undefined : watcherFn(value),
-			afterResolved = newValue => {
-				if(typeof newValue !== typeofValue) throw new TypeError(`Cannot set ${typeof newValue} value to ${typeofValue} pointer`);
-				value = newValue
-				watchers.forEach(execWatcher)
-			},
-
-			/**@type { { Function[] } } */
-			watchers = [],
-
-			watcherMap = new WeakMap(),
-			watcherIgnoreList = new WeakMap()
-		;
-
-		return publishedPtr[symbol] = /**Array_isArray(value)
-			? new Proxy({
-				element: [],
-				reverseObjectMap: new WeakMap(),
-				reversePrimitiveMap: new Map(),
-				length: 0,
-				push(...elements) {
-					elements.forEach(element => {
-						const index = this.element.length;
-						this.element.push(element);
-						this[`reverse${"function object".includes(typeof element)? "Object" : "Primitive"}Map`].set(element, index)
-					})
-				},
-				indexOf(searchElement, fromIndex) {
-					this[`reverse${"function object".includes(typeof searchElement)? "Object" : "Primitive"}Map`].get(searchElement)?.index || -1;
-				},
-				into(callbackFn) {
-
-				}
-
-			}, {
-				get(target, prop) {
-					return typeof prop == "number"
-						? target.element[prop]
-						: prop in Array.prototype || propCache[prop]
-						? target[prop]
-						: undefined
-					;
-				}
-			})
-		: */Object.assign(
-			{
-				[Symbol.toPrimitive](hint) {
-					return (typeof hint) == "symbol"
-						? hint === PTR_IDENTIFIER
-						: typeofValue == "function" && hint == "string"
-						? symbol
-						: value;
-				},
-				publish() {
-					const symbol = Symbol(description);
-					publishedPtr[symbol] = this;
-					return symbol
-				},
-				watch(watcherFn, timeout) {
-					watcherMap.set(watcherFn, { index: watchers.push(watcherFn) - 1, timeout });
-					return this;
-				},
-				ignore: {
-					set(watcherFn) {
-						watcherIgnoreList.set(watcherFn, !1);
-					},
-					delete(watcherFn) {
-						watcherIgnoreList.set(watcherFn, !0);
-					},
-				},
-				abort(watcherFn) {
-					delete watchers[watcherMap.get(watcherFn).index || -1]
-				},
-				until(value) {
-					let watcherFn;
-					return new Promise(resolveWait => this.watch(watcherFn = newValue => {
-						if(typeof value == "function" ? value(newValue) : newValue === value) {
-							this.abort(watcherFn);
-							resolveWait(newValue);
-						};
-					}))
-				},
-
-				get $() {
-					return value
-				},
-				set $(newValue) {
-					(newValue = setterFn(newValue)) instanceof Promise
-						? newValue.then(afterResolved)
-						: afterResolved(newValue)
-				},
-
-				get type() {
-					return typeofValue;
-				},
-
-				get length() {
-					return this.into($ => String($).length)
-				}
-			},
-			UNIVERSAL_TEMP,
-			TEMP[typeofValue]
 		)
 	},
-
-	createTemplate = (s, v) => {
-
-		const
-			temp = [],
-			ptr = createPtr(temp.join(""))
-		;
-
-		s.forEach((sBuf, sIndex) => temp[sIndex * 2] = sBuf);
-
-		v.forEach((vBuf, vIndex) => {
-
-			const tempIndex = (vIndex * 2) + 1;
-
-			temp[tempIndex] = isPtr(vBuf)
-				? (vBuf.watch(newValue => {
-					temp[tempIndex] = newValue;
-					ptr.$ = temp.join("")
-				}), vBuf.$)
-				: String(vBuf)
-
-		});
-
-		return ptr;
-
-	},
-
-	isFrozenArray = (x) => Array.isArray(x) && Object.isFrozen(x),
-
-	$ = (s, ...v) => isFrozenArray(s) && isFrozenArray(s.raw)
-		? createTemplate(s, v)
-		: "function object".includes(typeof x)
-		? createObjectPtr(s)
-		: createPtr(s, ...v)
+	$ = (s, ...v) => createPtr(s, ...v)
 ;
 
-let resolverSignature;
+let signature;
 
-while((resolverSignature = String.fromCharCode(...resolverSignatureGenCB())) in globalThis);
+while((signature = String.fromCharCode(...resolverSignatureGenCB())) in globalThis);
 
-Object.defineProperty(globalThis, resolverSignature, {
+Object.defineProperty(globalThis, signature, {
 	value: (symbol) => publishedPtr[symbol],
 	configurable: !1,
 	enumerable: !1
@@ -297,63 +208,3 @@ Object.defineProperty(globalThis, resolverSignature, {
  * @returns { object }
  */
 export { $, isPtr };
-
-// const getTypeof = value => typeof value;
-
-// const into = function(transformerFn) {
-
-// 	const
-// 		transformerResult = transformerFn(this.$),
-// 		isTransformerResultPromise = transformerResult instanceof Promise,
-// 		ptr = createPtr(isTransformerResultPromise
-// 			? undefined
-// 			: transformerResult
-// 		)
-// 	;
-
-// 	isTransformerResultPromise ? transformerResult.then($ => ptr.$ = $) : 0;
-
-// 	this.watch($ => {
-// 		const transformerResult = transformerFn($);
-// 		transformerResult instanceof Promise
-// 			? transformerResult.then($ => ptr.$ = $)
-// 			: (ptr.$ = transformerResult)
-// 	});
-
-// 	return ptr;
-// }
-
-// const newPtr = (value, setterFn, options) => {
-
-// 	let
-// 		typeofValue = typeof value,
-// 		valuePrototype = Object.getPrototypeOf(value)
-// 	;
-
-// 	return new Proxy({}, {
-// 		get(_, prop) {
-// 			const valueProperty = valuePrototype[prop];
-// 			if(getTypeof(valueProperty) == "function") {
-// 				const
-// 					{ length } = valueProperty,
-// 					bindedMethod = valueProperty.bind(value)
-// 				;
-// 				return function(...args) {
-// 					const argMap = args.map(arg => isPtr(arg)
-// 						// ? 
-// 					)
-// 				}
-// 			}
-// 		},
-// 		set(_, prop, newValue) {
-// 			if(prop === "$") {
-// 				const typeofNewValue = typeof newValue;
-// 				if(typeofNewValue !== typeofValue) {
-// 					valuePrototype = Object.getPrototypeOf(value)
-// 				}
-// 				value = setterFn(value)
-// 				return;
-// 			}
-// 		}
-// 	})
-// }
