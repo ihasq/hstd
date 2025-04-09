@@ -57,7 +57,7 @@ const
 				return new Promise(r => {
 					const watcherFn = $ => (typeof value == "function" ? value($) : $ === value)
 						? (this.abort(watcherFn), r(this))
-						: !1
+						: 0
 					;
 					this.watch(watcherFn);
 				})
@@ -94,6 +94,7 @@ const
 		},
 
 		...Object.keys(boolOps).map(op => ({
+
 			[op](_, value) {
 
 				const
@@ -107,6 +108,7 @@ const
 				return ptr;
 
 			}
+
 		}))
 
 	),
@@ -149,37 +151,40 @@ const
 
 					const [tmp] = buffer;
 
-					let buf = (
+					return (
 						prop === "$" ? tmp
 						: prop === "refresh" ? execWatcher.bind(null, tmp, !0, reciever)
 						: prop === PTR_IDENTIFIER ? !0
 						: (opTemp[prop]?.bind?.(reciever, buffer) || (
-							typeof tmp[prop] != "function"
-								? reciever.into($ => $[prop])
-								: UNDEFINED
+							typeof tmp[prop] == "function"
+								? function(...args) {
+							
+									const ptrBuf = createPtr()
+		
+									reciever.watch($ => ptrBuf.$ = $[prop](...args))
+		
+									const argMap = args.map((arg, i) => isPtr(arg)
+										? (arg.watch($ => (argMap[i] = $, ptrBuf.$ = reciever.$[prop](...argMap))), arg.$)
+										: arg
+									);
+		
+									ptrBuf.$ = tmp[prop].apply(tmp, argMap);
+		
+									return ptrBuf
+		
+								}
+								: reciever.into($ => $[prop])
 						))
 					);
-
-					if(buf === UNDEFINED) {
-						const ptrBuf = createPtr()
-						buf = function(...args) {
-							reciever.watch($ => ptrBuf.$ = $[prop](...args))
-							const argMap = args.map((arg, i) => isPtr(arg)
-								? (arg.watch($ => (argMap[i] = $, ptrBuf.$ = reciever.$[prop](...argMap))), arg.$)
-								: arg
-							);
-							ptrBuf.$ = tmp[prop].apply(tmp, argMap)
-							return ptrBuf
-						};
-					};
-
-					return buf;
 
 				},
 				set(_, prop, newValue) {
 					if(prop == "$") {
+
 						const tmp = setter(newValue);
+
 						tmp instanceof Promise ? tmp.then(execWatcher) : execWatcher(tmp)
+
 					}
 					return !0;
 				}
@@ -190,10 +195,10 @@ const
 	isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
 	createTemp = (s, ...v) => {
 		const code = String.fromCharCode(...resolverSignatureGenCB());
-		const start = code + "-start";
-		const end = code + "-end";
-		let temp = s.map((st, i) => st + (i in v ? (`\0${start}-${i}\0`) : "")).join("");
-		v.forEach((vt, i) => isPtr(vt) ? vt.watch($ => temp = temp.replace(`\0${start}-${i}\0`)) : "")
+		const temp = s.map((st, i) => st + (i in v ? `\0${code}-${i}\0` : "")).join("");
+		const ptr = createPtr();
+		v.forEach((vt, i) => isPtr(vt) ? vt.watch($ => ptr.$ = temp.replace(`\0${code}-${i}\0`)) : "");
+		
 	},
 	$ = (s, ...v) => (
 		/** isFrozenArray(s) && isFrozenArray(s.raw)
