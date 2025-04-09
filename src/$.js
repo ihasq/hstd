@@ -33,7 +33,10 @@ const
 		{
 
 			[Symbol.toPrimitive](_, hint) {
-				return hint === PTR_IDENTIFIER
+				return hint === "string"
+					? this.publish()
+					: hint === PTR_IDENTIFIER
+				;
 			},
 
 			watch(buffer, watcherFn) {
