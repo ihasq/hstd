@@ -21,11 +21,11 @@ const
 		sub:					(a, b) => a - b,
 		mul:					(a, b) => a * b,
 		div:					(a, b) => a / b,
-
 		mod:					(a, b) => a % b,
-		rsh:					(a, b) => a >> b,
-		ursh:					(a, b) => a >>> b,
-		lsh:					(a, b) => a << b,
+
+		// rsh:					(a, b) => a >> b,
+		// ursh:					(a, b) => a >>> b,
+		// lsh:					(a, b) => a << b,
 	},
 
 	opTemp = Object.assign(
@@ -65,18 +65,25 @@ const
 			},
 
 			until(_, value) {
+
 				return new Promise(r => {
+
 					const watcherFn = $ => (typeof value == "function" ? value($) : $ === value)
 						? (this.abort(watcherFn), r(this))
 						: 0
 					;
+
 					this.watch(watcherFn);
+
 				})
 			},
 
 			switch() {
+
 				this.$ = !this.$;
+
 				return this;
+
 			},
 
 			not() {
@@ -88,22 +95,36 @@ const
 			},
 
 			toString(_, base) {
-				const isPtrCache = isPtr(base);
-				const ptr = this.into($ => $.toString(isPtrCache ? base.$ : base));
+
+				const
+					isPtrCache = isPtr(base),
+					ptr = this.into($ => $.toString(isPtrCache ? base.$ : base))
+				;
+
 				isPtrCache ? base.watch($ => ptr.$ = this.$.toString($)) : 0;
+
 				return ptr;
+
 			},
 
 			publish(buffer) {
+
 				const symbol = Symbol(buffer[3]);
+
 				publishedPtr[symbol] = this;
+
 				return symbol;
+
 			},
 
 			text() {
+
 				const text = new Text(this.$);
+
 				this.watch($ => text.textContent = $);
+
 				return [text]
+
 			}
 		},
 
