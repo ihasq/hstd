@@ -12,12 +12,20 @@ const
 
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
-	UNDEFINED = Symbol("UNDEFINED"),
+	logicOps = {
+		or:						(a, b) => a || b,
+		and:					(a, b) => a && b,
+		xor:					(a, b) => a ^ b,
 
-	boolOps = {
-		or: (a, b) => a || b,
-		and: (a, b) => a && b,
-		xor: (a, b) => a ^ b
+		sum:					(a, b) => a + b,
+		sub:					(a, b) => a - b,
+		mul:					(a, b) => a * b,
+		div:					(a, b) => a / b,
+
+		mod:					(a, b) => a % b,
+		rsh:					(a, b) => a >> b,
+		ursh:					(a, b) => a >>> b,
+		lsh:					(a, b) => a << b,
 	},
 
 	opTemp = Object.assign(
@@ -77,7 +85,10 @@ const
 			},
 
 			toString(_, base) {
-				return this.into($ => $.toString(base))
+				const isPtrCache = isPtr(base);
+				const ptr = this.into($ => $.toString(isPtrCache ? base.$ : base));
+				isPtrCache ? base.watch($ => ptr.$ = this.$.toString($)) : 0;
+				return ptr;
 			},
 
 			publish(buffer) {
@@ -93,13 +104,13 @@ const
 			}
 		},
 
-		...Object.keys(boolOps).map(op => ({
+		...Object.keys(logicOps).map(op => ({
 
 			[op](_, value) {
 
 				const
 					isPtrCache = isPtr(value),
-					boolOp = boolOps[op],
+					boolOp = logicOps[op],
 					ptr = this.into($ => boolOp($, isPtrCache ? value.$ : value))
 				;
 
@@ -109,7 +120,13 @@ const
 
 			}
 
-		}))
+		})),
+
+		// ...Object.keys(Math).filter(x => typeof Math[x] == "function").map(x => ({
+		// 	[x](buffer, args) {
+		//		
+		// 	}
+		// }))
 
 	),
 
@@ -147,37 +164,53 @@ const
 			}), { name: { value: formattedOptions.name } }),
 
 			{
+
 				get(_, prop, reciever) {
 
 					const [tmp] = buffer;
 
 					return (
-						prop === "$" ? tmp
-						: prop === "refresh" ? execWatcher.bind(null, tmp, !0, reciever)
-						: prop === PTR_IDENTIFIER ? !0
-						: (opTemp[prop]?.bind?.(reciever, buffer) || (
-							typeof tmp[prop] == "function"
-								? function(...args) {
+
+						prop === "$"				? tmp
+						: prop === "refresh"		? execWatcher.bind(null, tmp, !0, reciever)
+						: prop === PTR_IDENTIFIER	? !0
+
+						: (
+							opTemp[prop]?.bind?.(reciever, buffer) || (
+
+								typeof tmp[prop] == "function" ? function(...args) {
 							
-									const ptrBuf = createPtr()
-		
-									reciever.watch($ => ptrBuf.$ = $[prop](...args))
-		
-									const argMap = args.map((arg, i) => isPtr(arg)
-										? (arg.watch($ => (argMap[i] = $, ptrBuf.$ = reciever.$[prop](...argMap))), arg.$)
-										: arg
-									);
-		
-									ptrBuf.$ = tmp[prop].apply(tmp, argMap);
+									const
+										argMap = args.map((arg, i) => (
+
+											isPtr(arg) ? (
+
+												arg.watch($ => (
+													argMap[i] = $,
+													ptrBuf.$ = reciever.$[prop](...argMap)
+												)),
+
+												arg.$
+
+											)
+											: arg
+										)),
+
+										ptrBuf = reciever.into($ => $[prop](...argMap))
+									;
 		
 									return ptrBuf
 		
 								}
+
 								: reciever.into($ => $[prop])
-						))
+
+							)
+						)
 					);
 
 				},
+
 				set(_, prop, newValue) {
 					if(prop == "$") {
 
@@ -188,6 +221,7 @@ const
 					}
 					return !0;
 				}
+
 			}
 
 		)
