@@ -77,7 +77,7 @@ const
 			},
 
 			toString(_, base) {
-				return this.into($ => Number($).toString(base))
+				return this.into($ => $.toString(base))
 			},
 
 			publish(buffer) {
@@ -187,7 +187,19 @@ const
 
 		)
 	},
-	$ = (s, ...v) => createPtr(s, ...v)
+	isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
+	createTemp = (s, ...v) => {
+		const code = String.fromCharCode(...resolverSignatureGenCB());
+		const start = code + "-start";
+		const end = code + "-end";
+		let temp = s.map((st, i) => st + (i in v ? (`\0${start}-${i}\0`) : "")).join("");
+		v.forEach((vt, i) => isPtr(vt) ? vt.watch($ => temp = temp.replace(`\0${start}-${i}\0`)) : "")
+	},
+	$ = (s, ...v) => (
+		/** isFrozenArray(s) && isFrozenArray(s.raw)
+			? createTemp(s, ...v)
+			: */ createPtr(s, ...v)
+	)
 ;
 
 let signature;
