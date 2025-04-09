@@ -192,14 +192,14 @@ const
 
 		)
 	},
-	isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
-	createTemp = (s, ...v) => {
-		const code = String.fromCharCode(...resolverSignatureGenCB());
-		const temp = s.map((st, i) => st + (i in v ? `\0${code}-${i}\0` : "")).join("");
-		const ptr = createPtr();
-		v.forEach((vt, i) => isPtr(vt) ? vt.watch($ => ptr.$ = temp.replace(`\0${code}-${i}\0`)) : "");
+	// isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
+	// createTemp = (s, ...v) => {
+	// 	const code = String.fromCharCode(...resolverSignatureGenCB());
+	// 	const temp = s.map((st, i) => st + (i in v ? `\0${code}-${i}\0` : "")).join("");
+	// 	const ptr = createPtr();
+	// 	v.forEach((vt, i) => isPtr(vt) ? vt.watch($ => ptr.$ = temp.replace(`\0${code}-${i}\0`)) : "");
 		
-	},
+	// },
 	$ = (s, ...v) => (
 		/** isFrozenArray(s) && isFrozenArray(s.raw)
 			? createTemp(s, ...v)
