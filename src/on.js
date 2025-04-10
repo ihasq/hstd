@@ -8,7 +8,7 @@ const
 
 	targetMap = new WeakMap(),
 
-	aEL = (ref, eventName, callbackFn) => {
+	aEL = function (eventName, callbackFn, ref) {
 
 		registeredEvent.includes(`\0${eventName}\0`) ? 0
 			: (
@@ -23,11 +23,11 @@ const
 
 		targetMap.has(ref) ? 0 : targetMap.set(ref, {});
 
-		(targetMap.get(ref)[eventName] ||= []).push(callbackFn)
+		(targetMap.get(ref)[eventName] ||= []).push(callbackFn);
 
 	},
 
-	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(eventName => aEL(ref, eventName, callbacks[eventName]))),
+	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(eventName => aEL(eventName, callbacks[eventName], ref))),
 
 	publisher = bundled.publish.bind(bundled),
 
@@ -38,8 +38,7 @@ const
 
 				eventName === Symbol.toPrimitive	? publisher
 				: eventName === "$"					? publisher()
-
-				: (handlerCache[eventName] ||= $((callbackFn, ref) => aEL(ref, eventName, callbackFn), undefined, { name: "on." + eventName })).publish()
+				:									(handlerCache[eventName] ||= $(aEL.bind(null, eventName), undefined, { name: "on." + eventName })).publish()
 			)
 		}
 	})

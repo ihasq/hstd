@@ -157,7 +157,11 @@ export const h = (s, ...v) => {
 
 		} else {
 
-			ref.replaceWith(...(vBody[Symbol.toPrimitive]?.(HTML_IDENTIFIER) ? vBody : isPtr(vBody) ? vBody.text() : [new Text(vBody)]));
+			ref.replaceWith(...(
+				vBody[Symbol.toPrimitive]?.(HTML_IDENTIFIER)	? vBody
+				: isPtr(vBody)									? vBody.text()
+				:												[new Text(vBody)]
+			));
 
 		}
 

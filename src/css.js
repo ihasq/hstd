@@ -12,11 +12,11 @@ const
 
 	formStyleProp = (styleProp) => formedStyleProp[styleProp] ||= styleProp.replaceAll(formerRegex, lowercaseMatcher),
 
-	applyValue = (styleProp, value, ref) => (
-		isPtr(value)
+	applyValue = function(styleProp, value, ref) {
+		return isPtr(value)
 			? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
 			: value
-	),
+	},
 
 	bundled = $((value, ref) => ref.style.cssText = Object.keys(value).map(styleProp => `${formStyleProp(styleProp)}:${applyValue(styleProp, value[styleProp], ref)};`).join("")),
 
@@ -27,8 +27,8 @@ const
 			return (
 				styleProp === Symbol.toPrimitive	? publisher
 				: styleProp === "$"					? publisher()
-				: styleCache[styleProp] ||= $((value, ref) => applyValue(styleProp, value, ref)
-			).publish())
+				:									(styleCache[styleProp] ||= $(applyValue.bind(null, styleProp))).publish()
+			)
 		}
 	})
 ;
