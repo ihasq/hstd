@@ -10,7 +10,7 @@ export const prop = (callback, nameFn) => {
 				return (
 					prop === Symbol.toPrimitive	? publisher
 					: prop === "$"				? publisher()
-					:							(cache[prop] ||= createPtr(callback.bind(null, prop), undefined, { name: nameFn(prop) })).publish()
+					:							(cache[prop] ||= createPtr(callback.bind(null, prop), undefined, { name: nameFn ? nameFn(prop) : "" })).publish()
 				)
 			}
 		}),
