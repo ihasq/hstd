@@ -1,4 +1,4 @@
-import { $, h as html, on, css } from "https://esm.sh/libh@latest";
+import { $, h as html, on, css } from "../src/mod.js";
 /**
  * 
  * @param { string } href
@@ -42,6 +42,8 @@ function CommandArea(text) {
 				userSelect: "none",
 
 				padding: "16px 20px",
+
+				fontFamily: "Courier New",
 				fontSize: "16px"
 			},
 			[on.click]() {
@@ -82,13 +84,12 @@ export default function() {
 			[css]: {
 				boxSizing: "border-box",
 				padding: "60px calc(20% - 60px)",
-				fontFamily: "int"
 			},
 		}}>
 
 			<h1 ${{
 				[css.margin]: "40px 0",
-				[css.fontFamily]: 'jbm'
+				[css.fontFamily]: 'Courier New"'
 			}}>
 				lib${Link("https://libh.js.org", "h")}
 			</h1>
@@ -112,13 +113,13 @@ export default function() {
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
-				<h2 ${{ [css.fontFamily]: 'jbm' }}>Install</h2>
+				<h2 ${{ [css.fontFamily]: 'Courier New' }}>Install</h2>
 
 				${CommandArea("npm i libh")}
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
-				<h2 ${{ [css.fontFamily]: 'jbm' }}>Download</h2>
+				<h2 ${{ [css.fontFamily]: 'Courier New' }}>Download</h2>
 
 				${CommandArea("import { $, h as html } from \"https://libh.dev\"")}
 			</div>
@@ -128,7 +129,7 @@ export default function() {
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
-				<h2 ${{ [css.fontFamily]: 'jbm' }}>License</h2>
+				<h2 ${{ [css.fontFamily]: 'Courier New' }}>License</h2>
 
 				libh is ${Link("https://www.wtfpl.net", "WTFPL licensed")}.
 			</div>

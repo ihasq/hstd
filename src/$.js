@@ -277,7 +277,7 @@ const
 
 					if(prop == "$") {
 
-						const tmp = setter(newValue);
+						const tmp = setter ? setter(newValue) : newValue;
 
 						tmp instanceof Promise ? tmp.then(execWatcher) : execWatcher(tmp)
 

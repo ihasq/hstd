@@ -9,21 +9,17 @@ const
 	lowercaseCache = {},
 	lowercaseMatcher = (match) => lowercaseCache[match] ||= "-" + match.toLowerCase(),
 
-	formStyleProp = (styleProp) => formedStyleProp[styleProp] ||= styleProp.replaceAll(formerRegex, lowercaseMatcher),
-
 	css = prop(
 
-		function(styleProp, value, ref) {
-			return `${formStyleProp(styleProp)}:${
-				isPtr(value)
-					? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
-					: value
-			};`
+		function(styleProp, styleValue, ref) {
+			ref.style[styleProp] = (
+				isPtr(styleValue)
+					? (styleValue.watch($ => ref.style[styleProp] = $), styleValue.$)
+					: styleValue
+			)
 		},
 
-		prop => "css-" + formStyleProp(prop),
-
-		(map, ref) => ref.style.cssText = map.join("")
+		prop => "css-" + (formedStyleProp[prop] ||= prop.replaceAll(formerRegex, lowercaseMatcher))
 
 	)
 ;
