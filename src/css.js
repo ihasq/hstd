@@ -14,11 +14,11 @@ const
 	css = prop(
 
 		function(styleProp, value, ref) {
-			return (formStyleProp(styleProp) + ":" + (
+			return `${formStyleProp(styleProp)}:${
 				isPtr(value)
 					? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
 					: value
-			) + ";")
+			};`
 		},
 
 		prop => "css-" + formStyleProp(prop),
