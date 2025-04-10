@@ -27,7 +27,7 @@ const
 			return (
 				styleProp === Symbol.toPrimitive	? getBundled
 				: styleProp === "$"					? getBundled()
-				: styleCache[styleProp] ||= $((value, ref) => applyValue(styleProp, value[styleProp], ref)
+				: styleCache[styleProp] ||= $((value, ref) => applyValue(styleProp, value, ref)
 			).publish())
 		}
 	})
