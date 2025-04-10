@@ -1,13 +1,36 @@
 import { $ } from "./$.js"
 
-let registeredEvent = "";
+let registeredEvent = "\0";
 
 const
+
 	handlerCache = {},
-	runAEL = (callback, ref, eventName) => ref.addEventListener(eventName, callback, { passive: !0 }),
-	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(eventName => runAEL(callbacks[eventName], ref, eventName))),
+
 	targetMap = new WeakMap(),
-	bundledPublishFn = () => bundled.publish(),
+
+	aEL = (ref, eventName, callbackFn) => {
+
+		registeredEvent.includes("\0" + eventName + "\0") ? 0
+			: (
+				globalThis.addEventListener(
+					eventName,
+					e => targetMap.get(e.target)?.[eventName]?.forEach(x => x(e)),
+					{ passive: !0 }
+				),
+				registeredEvent += eventName + "\0"
+			)
+		;
+
+		targetMap.has(ref) ? 0 : targetMap.set(ref, {});
+
+		(targetMap.get(ref)[eventName] ||= []).push(callbackFn)
+
+	},
+
+	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(eventName => aEL(ref, eventName, callbacks[eventName]))),
+
+	bundledPublishFn = bundled.publish.bind(bundled),
+
 	on = new Proxy({}, {
 		get(_, eventName) {
 
@@ -16,26 +39,7 @@ const
 				eventName === Symbol.toPrimitive	? bundledPublishFn
 				: eventName === "$"					? bundledPublishFn()
 
-				: (
-					handlerCache[eventName] ||= $((callbackFn, ref) => {
-
-						if(!(registeredEvent.includes(eventName))) {
-							runAEL(e => targetMap.get(e.target)?.[eventName]?.forEach?.(x => x(e)), globalThis, eventName);
-							registeredEvent += eventName + "\0"
-						}
-
-						if(typeof callbackFn == "object") {
-							const callbackFnBody = callbackFn.fn;
-							callbackFn = callbackFnBody;
-						};
-
-						if(!targetMap.has(ref)) targetMap.set(ref, {});
-
-						(targetMap.get(ref)[eventName] ||= []).push(callbackFn)
-
-					}, undefined, { name: "on." + eventName })
-
-				).publish()
+				: (handlerCache[eventName] ||= $((callbackFn, ref) => aEL(ref, eventName, callbackFn), undefined, { name: "on." + eventName })).publish()
 			)
 		}
 	})
