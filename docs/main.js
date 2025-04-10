@@ -1,4 +1,4 @@
-import { $, h as html, on, css } from "libh";
+import { $, h as html, on, css } from "https://esm.sh/libh@latest";
 /**
  * 
  * @param { string } href
