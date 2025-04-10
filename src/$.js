@@ -94,6 +94,15 @@ const
 				})
 			},
 
+			// refresh(buffer) {
+			// 	buffer[4]?.(0, true, this);
+			// 	return this;
+			// },
+
+			// sync(buffer, ...ptrs) {
+			// 	ptrs.forEach(ptr => isPtr(ptr) ? ptr.watch($ => this.$ = this.$) : 0)
+			// },
+
 			switch() {
 
 				this.$ = !this.$;
@@ -112,6 +121,11 @@ const
 
 				return this.into($ => !!$)
 
+			},
+
+			tick() {
+				let bool = false;
+				return this.into(() => bool = !bool)
 			},
 
 			toString(_, base) {
@@ -194,6 +208,7 @@ const
 				watchers,
 				watcherInfo,
 				signature + (options.name || ""),
+				execWatcher
 			]
 		;
 

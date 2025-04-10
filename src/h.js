@@ -17,7 +17,7 @@ const
 
 	fragmentTemp = {
 
-		[Symbol.toPrimitive](hint) {
+		[Symbol.toPrimitive](hint) {k
 			return typeof hint == "string" ? [...this[Symbol.iterator]().map(element => element.outerHTML)].join("") : hint === HTML_IDENTIFIER
 		},
 
