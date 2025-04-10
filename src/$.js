@@ -124,8 +124,11 @@ const
 			},
 
 			tick() {
+
 				let bool = false;
+
 				return this.into(() => bool = !bool)
+
 			},
 
 			toString(_, base) {
