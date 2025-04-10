@@ -10,7 +10,7 @@ const
 
 	aEL = (ref, eventName, callbackFn) => {
 
-		registeredEvent.includes("\0" + eventName + "\0") ? 0
+		registeredEvent.includes(`\0${eventName}\0`) ? 0
 			: (
 				globalThis.addEventListener(
 					eventName,
@@ -29,15 +29,15 @@ const
 
 	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(eventName => aEL(ref, eventName, callbacks[eventName]))),
 
-	bundledPublishFn = bundled.publish.bind(bundled),
+	publisher = bundled.publish.bind(bundled),
 
 	on = new Proxy({}, {
 		get(_, eventName) {
 
 			return (
 
-				eventName === Symbol.toPrimitive	? bundledPublishFn
-				: eventName === "$"					? bundledPublishFn()
+				eventName === Symbol.toPrimitive	? publisher
+				: eventName === "$"					? publisher()
 
 				: (handlerCache[eventName] ||= $((callbackFn, ref) => aEL(ref, eventName, callbackFn), undefined, { name: "on." + eventName })).publish()
 			)

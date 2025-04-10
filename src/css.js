@@ -18,15 +18,15 @@ const
 			: value
 	),
 
-	bundledProp = $((value, ref) => ref.style.cssText = Object.keys(value).map(styleProp => `${formStyleProp(styleProp)}:${applyValue(styleProp, value[styleProp], ref)};`).join("")),
+	bundled = $((value, ref) => ref.style.cssText = Object.keys(value).map(styleProp => `${formStyleProp(styleProp)}:${applyValue(styleProp, value[styleProp], ref)};`).join("")),
 
-	getBundled = () => bundledProp.publish(),
+	publisher = bundled.publish.bind(bundled),
 
 	css = new Proxy({}, {
 		get(_, styleProp) {
 			return (
-				styleProp === Symbol.toPrimitive	? getBundled
-				: styleProp === "$"					? getBundled()
+				styleProp === Symbol.toPrimitive	? publisher
+				: styleProp === "$"					? publisher()
 				: styleCache[styleProp] ||= $((value, ref) => applyValue(styleProp, value, ref)
 			).publish())
 		}
