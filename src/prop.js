@@ -1,6 +1,6 @@
 import { createPtr } from "./$.js"
 
-export const createProp = (callback, nameFn, bundler) => {
+export const prop = (callback, nameFn, bundler) => {
 
 	const
 		cache = {},

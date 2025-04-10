@@ -1,5 +1,5 @@
-import { createPtr, isPtr } from "./$.js"
-import { createProp } from "./prop.js";
+import { isPtr } from "./$.js"
+import { prop } from "./prop.js";
 
 const
 
@@ -11,15 +11,17 @@ const
 
 	formStyleProp = (styleProp) => formedStyleProp[styleProp] ||= styleProp.replaceAll(formerRegex, lowercaseMatcher),
 
-	css = createProp(
+	css = prop(
 
 		function(styleProp, value, ref) {
-			return isPtr(value)
-				? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
-				: value
+			return (formStyleProp(styleProp) + ":" + (
+				isPtr(value)
+					? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
+					: value
+			) + ";")
 		},
 
-		name => "css-" + formStyleProp(name),
+		prop => "css-" + formStyleProp(prop),
 
 		(map, ref) => ref.style.cssText = map.join("")
 

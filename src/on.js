@@ -1,5 +1,4 @@
-import { createPtr } from "./$.js"
-import { createProp } from "./prop.js";
+import { prop } from "./prop.js";
 
 let registeredEvent = "\0";
 
@@ -7,7 +6,7 @@ const
 
 	targetMap = new WeakMap(),
 
-	on = createProp(
+	on = prop(
 
 		function (eventName, callbackFn, ref) {
 
@@ -28,7 +27,7 @@ const
 	
 		},
 
-		name => "on." + name
+		prop => "on." + prop
 
 	)
 ;
