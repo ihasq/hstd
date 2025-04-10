@@ -4,7 +4,8 @@ let registeredEvent = "";
 
 const
 	handlerCache = {},
-	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(event => ref.addEventListener(event, callbacks[event], { passive: !0 }))),
+	runAEL = (callback, ref, eventName) => ref.addEventListener(eventName, callback, { passive: !0 }),
+	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(eventName => runAEL(callbacks[eventName], ref, eventName))),
 	targetMap = new WeakMap(),
 	bundledPublishFn = () => bundled.publish(),
 	on = new Proxy({}, {
@@ -19,7 +20,7 @@ const
 					handlerCache[eventName] ||= $((callbackFn, ref) => {
 
 						if(!(registeredEvent.includes(eventName))) {
-							globalThis.addEventListener(eventName, e => targetMap.get(e.target)?.[eventName]?.forEach?.(x => x(e)), { passive: !0 })
+							runAEL(e => targetMap.get(e.target)?.[eventName]?.forEach?.(x => x(e)), globalThis, eventName);
 							registeredEvent += eventName + "\0"
 						}
 
