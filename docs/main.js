@@ -1,4 +1,4 @@
-import { $, h as html, on, css } from "./libh.min.js";
+import { $, h as html, on, css } from "../src/mod.js";
 /**
  * 
  * @param { string } href
