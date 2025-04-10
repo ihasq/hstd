@@ -3,8 +3,6 @@ import { createProp } from "./prop.js";
 
 const
 
-	styleCache = {},
-
 	formedStyleProp = {},
 	formerRegex = /[A-Z]{1}/g,
 
@@ -13,15 +11,19 @@ const
 
 	formStyleProp = (styleProp) => formedStyleProp[styleProp] ||= styleProp.replaceAll(formerRegex, lowercaseMatcher),
 
-	applyValue = function(styleProp, value, ref) {
-		return isPtr(value)
-			? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
-			: value
-	},
+	css = createProp(
 
-	bundled = createPtr((value, ref) => ref.style.cssText = Object.keys(value).map(styleProp => `${formStyleProp(styleProp)}:${applyValue(styleProp, value[styleProp], ref)};`).join("")),
+		function(styleProp, value, ref) {
+			return isPtr(value)
+				? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
+				: value
+		},
 
-	css = createProp(bundled, styleCache, applyValue, name => "css-" + formStyleProp(name))
+		name => "css-" + formStyleProp(name),
+
+		(map, ref) => ref.style.cssText = map.join("")
+
+	)
 ;
 
 export { css } 
