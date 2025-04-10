@@ -1,4 +1,5 @@
-import { $ } from "./$.js"
+import { createPtr } from "./$.js"
+import { createProp } from "./prop.js";
 
 let registeredEvent = "\0";
 
@@ -27,21 +28,23 @@ const
 
 	},
 
-	bundled = $((callbacks, ref) => Object.keys(callbacks).forEach(eventName => aEL(eventName, callbacks[eventName], ref))),
+	bundled = createPtr((callbacks, ref) => Object.keys(callbacks).forEach(eventName => aEL(eventName, callbacks[eventName], ref))),
 
-	publisher = bundled.publish.bind(bundled),
+	// publisher = bundled.publish.bind(bundled),
 
-	on = new Proxy({}, {
-		get(_, eventName) {
+	// on = new Proxy({}, {
+	// 	get(_, eventName) {
 
-			return (
+	// 		return (
 
-				eventName === Symbol.toPrimitive	? publisher
-				: eventName === "$"					? publisher()
-				:									(handlerCache[eventName] ||= $(aEL.bind(null, eventName), undefined, { name: "on." + eventName })).publish()
-			)
-		}
-	})
+	// 			eventName === Symbol.toPrimitive	? publisher
+	// 			: eventName === "$"					? publisher()
+	// 			:									(handlerCache[eventName] ||= createPtr(aEL.bind(null, eventName), void 0, { name: "on." + eventName })).publish()
+	// 		)
+	// 	}
+	// }),
+
+	on = createProp(bundled, handlerCache, aEL, name => "on." + name)
 ;
 
 export { on }

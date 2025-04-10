@@ -336,4 +336,4 @@ Object.defineProperty(globalThis, signature, {
  * @param { object } options 
  * @returns { object }
  */
-export { $, isPtr };
+export { $, isPtr, createPtr };
