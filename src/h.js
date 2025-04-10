@@ -122,9 +122,9 @@ export const h = (s, ...v) => {
 
 							ref.addEventListener("input", ({ target: { [attrProp]: value } }) => {
 
+
 								attrValue.$ = (
-									ref.type == "checkbox"					? value !== "false"
-									: "number\0range".includes(ref.type)	? Number(value)
+									"number\0range".includes(ref.type)	? Number(value)
 									: value
 								)
 
