@@ -10,6 +10,8 @@ const
 		}
 	},
 
+	createSignature = () => String.fromCharCode(...resolverSignatureGenCB()),
+
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
 	logicOps = {
@@ -24,7 +26,7 @@ const
 		mod:					(a, b) => a % b,
 
 		// rsh:					(a, b) => a >> b,
-		// ursh:					(a, b) => a >>> b,
+		// ursh:				(a, b) => a >>> b,
 		// lsh:					(a, b) => a << b,
 	},
 
@@ -58,8 +60,8 @@ const
 				return this;
 			},
 
-			into(buffer, transformerFn = $ => $) {
-				const newPtr = createPtr(transformerFn(buffer[0]))
+			into([value], transformerFn = $ => $) {
+				const newPtr = createPtr(transformerFn(value))
 				this.watch($ => newPtr.$ = transformerFn($));
 				return newPtr;
 			},
@@ -250,24 +252,30 @@ const
 
 		)
 	},
-	// isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
-	// createTemp = (s, ...v) => {
-	// 	const code = String.fromCharCode(...resolverSignatureGenCB());
-	// 	const temp = s.map((st, i) => st + (i in v ? `\0${code}-${i}\0` : "")).join("");
-	// 	const ptr = createPtr();
-	// 	v.forEach((vt, i) => isPtr(vt) ? vt.watch($ => ptr.$ = temp.replace(`\0${code}-${i}\0`)) : "");
-		
-	// },
-	$ = (s, ...v) => (
-		/** isFrozenArray(s) && isFrozenArray(s.raw)
-			? createTemp(s, ...v)
-			: */ createPtr(s, ...v)
-	)
+
+	isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
+
+	createTemp = (s, ...v) => {
+
+		const
+			code = createSignature(),
+			temp = s.join(code),
+			tempMatcherRegex = new RegExp(code, "g"),
+			vMap = v.map((vt, i) => isPtr(vt) ? (vt.watch(() => (vMap[i] = vt.$, ptr.$ = refreshTemp())), vt.$) : vt),
+			refreshTemp = (x = 0) => temp.replaceAll(tempMatcherRegex, () => vMap[x++]),
+			ptr = createPtr(refreshTemp())
+		;
+
+		return ptr;
+
+	},
+
+	$ = (...x) => (isFrozenArray(x[0]) && isFrozenArray(x[0]?.raw) ? createTemp : createPtr).apply(null, x)
 ;
 
 let signature;
 
-while((signature = String.fromCharCode(...resolverSignatureGenCB())) in globalThis);
+while((signature = createSignature()) in globalThis);
 
 Object.defineProperty(globalThis, signature, {
 	value: (symbol) => publishedPtr[symbol],
