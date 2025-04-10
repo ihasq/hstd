@@ -34,35 +34,49 @@ const
 
 		{
 
-			[Symbol.toPrimitive](_, hint) {
-				return hint === "string"
-					? this.publish()
-					: hint === PTR_IDENTIFIER
-				;
+			[Symbol.toPrimitive]([value], hint) {
+
+				return (
+					typeof hint === "string"
+						? hint === "string" && typeof value == "function"
+							? this.publish()
+							: value.toString()
+						: hint === PTR_IDENTIFIER
+				);
+
 			},
 
 			watch(buffer, watcherFn) {
+
 				if(watcherFn) {
 					buffer[2].set(watcherFn, [
 						buffer[1].push(watcherFn) - 1,
 						!0
 					])
 				};
+
 				return this;
+
 			},
 
 			abort(buffer, watcherFn) {
+
 				if(watcherFn) {
 					const info = buffer[2].get(watcherFn);
 					info[1] = !1;
 					delete buffer[1][info?.[0]];
 				};
+
 				return this;
+
 			},
 
 			into([value], transformerFn = $ => $) {
+
 				const newPtr = createPtr(transformerFn(value))
+
 				this.watch($ => newPtr.$ = transformerFn($));
+
 				return newPtr;
 			},
 
@@ -89,11 +103,15 @@ const
 			},
 
 			not() {
+
 				return this.into($ => !$)
+
 			},
 
 			bool() {
+
 				return this.into($ => !!$)
+
 			},
 
 			toString(_, base) {
@@ -165,7 +183,7 @@ const
 			watcherInfo = new WeakMap(),
 			formattedOptions = Object.assign({ name: "$" }, options),
 			execWatcher = function (value, force, ptr) {
-				force || (value !== buffer[0])
+				(force || (value !== buffer[0]))
 					? (buffer[0] = value, watchers.forEach(fn => watcherInfo.get(fn)?.[1] ? fn(value) : 0))
 					: 0
 				;
@@ -238,6 +256,7 @@ const
 				},
 
 				set(_, prop, newValue) {
+
 					if(prop == "$") {
 
 						const tmp = setter(newValue);
@@ -245,7 +264,9 @@ const
 						tmp instanceof Promise ? tmp.then(execWatcher) : execWatcher(tmp)
 
 					}
+
 					return !0;
+
 				}
 
 			}
@@ -261,7 +282,14 @@ const
 			code = createSignature(),
 			temp = s.join(code),
 			tempMatcherRegex = new RegExp(code, "g"),
-			vMap = v.map((vt, i) => isPtr(vt) ? (vt.watch(() => (vMap[i] = vt.$, ptr.$ = refreshTemp())), vt.$) : vt),
+			vMap = v.map((vt, i) => (
+				isPtr(vt)
+					? (
+						vt.watch(() => (vMap[i] = vt.$, ptr.$ = refreshTemp())),
+						vt.$
+					)
+					: vt
+			)),
 			refreshTemp = (x = 0) => temp.replaceAll(tempMatcherRegex, () => vMap[x++]),
 			ptr = createPtr(refreshTemp())
 		;

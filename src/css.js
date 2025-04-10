@@ -1,4 +1,4 @@
-import { $ } from "./$.js"
+import { $, isPtr } from "./$.js"
 
 const
 
@@ -12,19 +12,23 @@ const
 
 	formStyleProp = (styleProp) => formedStyleProp[styleProp] ||= styleProp.replaceAll(formerRegex, lowercaseMatcher),
 
-	bundledProp = $((value, ref) => ref.style.cssText = Object.keys(value).map(prop => `${formStyleProp(prop)}:${value[prop]};`).join("")),
+	applyValue = (styleProp, value, ref) => (
+		isPtr(value)
+			? (value.watch($ => ref.style[formStyleProp(styleProp)] = $), value.$)
+			: value
+	),
+
+	bundledProp = $((value, ref) => ref.style.cssText = Object.keys(value).map(styleProp => `${formStyleProp(styleProp)}:${applyValue(styleProp, value[styleProp], ref)};`).join("")),
 
 	getBundled = () => bundledProp.publish(),
 
 	css = new Proxy({}, {
 		get(_, styleProp) {
-			return styleProp === Symbol.toPrimitive
-			? getBundled
-			: styleProp === "$"
-			? getBundled()
-			: (styleCache[styleProp] ||= $((value, ref) => {
-				ref.style[formStyleProp(styleProp)] = value
-			})).publish()
+			return (
+				styleProp === Symbol.toPrimitive	? getBundled
+				: styleProp === "$"					? getBundled()
+				: styleCache[styleProp] ||= $((value, ref) => applyValue(styleProp, value[styleProp], ref)
+			).publish())
 		}
 	})
 ;
