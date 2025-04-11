@@ -1,5 +1,11 @@
 import { createPtr } from "./$.js"
 
+/**
+ * 
+ * @param { (prop: string, value: any, ref: HTMLElement) => void } callback 
+ * @param { (name: string) => string } nameFn 
+ * @returns { object }
+ */
 export const prop = (callback, nameFn) => {
 
 	const

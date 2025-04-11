@@ -1,4 +1,5 @@
 import { isPtr } from "./$.js";
+import { aEL } from "./on.js";
 
 const
 
@@ -44,7 +45,99 @@ const
 		}
 	},
 
-	bindResolver = (resolver, buf) => Reflect.ownKeys(buf).forEach(resolver.bind(!1, buf))
+	bindResolver = (t, attrBody) => Reflect.ownKeys(attrBody).forEach(attrResolve.bind(null, t, attrBody)),
+
+	attrResolve = function(t, attrBody, attrProp) {
+
+		const
+			[id, ref] = t,
+			attrValue = attrBody[attrProp],
+			attrPropType = typeof attrProp
+		;
+
+		if(attrPropType == "symbol") {
+
+			const attrPtr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
+
+			if(!isPtr(attrPtr)) return;
+			
+			const buf = attrPtr.$(attrValue, ref);
+
+			if(buf?.constructor !== Object) return;
+
+			bindResolver(t, buf);
+
+		} else if(attrPropType == "string") {
+
+			if(isPtr(attrValue)) {
+
+				ref[attrProp] = attrValue.watch($ => ref[attrProp] = $).$;
+
+				if("\0value\0checked\0".includes(`\0${attrProp}\0`) && attrProp in ref) aEL(
+					"input",
+					({ target: { [attrProp]: value } }) => attrValue.$ = (
+						"number\0range".includes(ref.type)
+							? Number(value)
+							: value
+					),
+					ref
+				);
+
+			} else if(attrProp == "id" && !(attrValue in id)) {
+
+				id[attrValue] = new Proxy(ref, refProxyHandler);
+
+			} else {
+
+				ref[attrProp] = attrValue;
+
+			}
+		}
+	},
+
+	queryResolve = function(placeholder, tokenBuf, v, id, ref, index) {
+
+		const vBody = v[index];
+
+		if(placeholder[index]) {
+
+			bindResolver([id, ref], vBody);
+
+		} else {
+
+			ref.replaceWith(...(
+				vBody[Symbol.toPrimitive]?.(HTML_IDENTIFIER)	? vBody
+				: isPtr(vBody)									? vBody.text()
+				:												[new Text(vBody)]
+			));
+
+		}
+
+		ref.removeAttribute(tokenBuf);
+	},
+
+	elementTempBase = function (node, placeholder, fragmentTemp, tokenBuf, v) {
+
+		const
+			newNode = node.cloneNode(!0),
+			id = {}
+		;
+		
+		newNode.querySelectorAll(`[${tokenBuf}]`).forEach(queryResolve.bind(null, placeholder, tokenBuf, v, id));
+
+		return Object.assign(
+
+			newNode.childNodes,
+			fragmentTemp,
+			{
+				then(onloadCallbackFn) {
+					onloadCallbackFn(id);
+					return this;
+				}
+			}
+	
+		);
+	}
 ;
 
 /**
@@ -60,8 +153,14 @@ export const h = (s, ...v) => {
 
 	if(!createElementTemp) {
 
-		let joined = s.join(""), tokenBuf, replacementCounter = 0;
+		let
+			joined = s.join(""),
+			replacementCounter = 0,
+			tokenBuf
+		;
+
 		while(joined.includes(tokenBuf = String.fromCharCode(...createToken())));
+
 		joined = s.join(tokenBuf);
 
 		const
@@ -81,103 +180,8 @@ export const h = (s, ...v) => {
 				: `<br ${tokenBuf}>`
 		);
 
-		elementTempMap.set(s, createElementTemp = () => [node.cloneNode(!0), placeholder, tokenBuf])
+		elementTempMap.set(s, createElementTemp = elementTempBase.bind(null, node, placeholder, fragmentTemp, tokenBuf))
 	};
 
-	const
-		[newNode, placeholder, tokenBuf] = createElementTemp(),
-		id = {}
-	;
-
-	newNode.querySelectorAll(`[${tokenBuf}]`).forEach((ref, index) => {
-
-		const vBody = v[index];
-
-		if(placeholder[index]) {
-
-			const attrResolve = function(attrBody, attrProp) {
-
-				const
-					attrValue = attrBody[attrProp],
-					attrPropType = typeof attrProp
-				;
-
-				if(attrPropType == "symbol") {
-
-					const attrPtr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
-
-					if(!isPtr(attrPtr)) return;
-					
-					const buf = attrPtr.$(attrValue, ref);
-
-					if(buf?.constructor !== Object) return;
-
-					bindResolver(attrResolve, buf);
-
-				} else if(attrPropType == "string") {
-
-					if(isPtr(attrValue)) {
-
-						if("value\0checked".includes(attrProp) && attrProp in ref) {
-
-							ref[attrProp] = attrValue.$;
-							const oninput = $ => ref[attrProp] = $;
-							attrValue.watch(oninput);
-
-							ref.addEventListener("input", ({ target: { [attrProp]: value } }) => {
-
-
-								attrValue.$ = (
-									"number\0range".includes(ref.type)	? Number(value)
-									: value
-								)
-
-							}, { passive: !0 })
-
-						} else {
-
-							ref[attrProp] = attrValue.$
-							attrValue.watch(newAttrValue => ref[attrProp] = newAttrValue)
-
-						}
-
-					} else if(attrProp == "id" && !(attrValue in id)) {
-
-						id[attrValue] = new Proxy(ref, refProxyHandler);
-
-					} else {
-
-						ref[attrProp] = attrValue;
-
-					}
-				}
-			}
-
-			bindResolver(attrResolve, vBody);
-
-		} else {
-
-			ref.replaceWith(...(
-				vBody[Symbol.toPrimitive]?.(HTML_IDENTIFIER)	? vBody
-				: isPtr(vBody)									? vBody.text()
-				:												[new Text(vBody)]
-			));
-
-		}
-
-		ref.removeAttribute(tokenBuf);
-	});
-
-	return Object.assign(
-
-		newNode.childNodes,
-		fragmentTemp,
-		{
-			then(onloadCallbackFn) {
-				onloadCallbackFn(id);
-				return this;
-			}
-		}
-
-	);
+	return createElementTemp(v)
 };
