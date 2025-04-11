@@ -73,7 +73,7 @@ function Examples() {
 				fontFamily: "int",
 				fontSize: "16px"
 			}
-		}}>❤ I love libh ${count} times! ❤</button><br>
+		}}>❤ I love hstd ${count} times! ❤</button><br>
 	`
 }
 
@@ -91,37 +91,37 @@ export default function() {
 				[css.margin]: "40px 0",
 				[css.fontFamily]: 'Courier New"'
 			}}>
-				lib${Link("https://libh.js.org", "h")}
+				${Link("https://libh.js.org", "h")}std
 			</h1>
 
 			<div ${{ [css.margin]: "0 0 20px" }}>
-				${Link("https://github.com/ihasq/libh", "GitHub")}
+				${Link("https://github.com/ihasq/hstd", "GitHub")}
 				${Link("https://stackblitz.com/edit/vitejs-vite-vcga6uwx?file=main.js", "StackBlitz")}
 			</div>
 
 			<div ${{ [css.margin]: "0 0 20px" }}>
-				${Badge("https://img.shields.io/npm/v/libh?logo=npm&color=%23CC3534", "npm version badge", "https://npmjs.com/package/libh")}
-				${Badge("https://img.shields.io/bundlejs/size/libh?logo=stackblitz", "npm package minimized gzipped size", "https://bundlephobia.com/package/libh")}
+				${Badge("https://img.shields.io/npm/v/hstd?logo=npm&color=%23CC3534", "npm version badge", "https://npmjs.com/package/libh")}
+				${Badge("https://img.shields.io/bundlejs/size/hstd?logo=stackblitz", "npm package minimized gzipped size", "https://bundlephobia.com/package/libh")}
 			</div>
 
 			<div ${{ [css.margin]: "40px 0 0" }}>
-				libh is a minimal JavaScript library to build simple, reactive, extensible web interface. 
+				Hstd = HyperStandard is a minimal JavaScript library to build simple, reactive, extensible web interface. 
 			</div>
 
 			<div ${{ [css.margin]: "20px 0 0" }}>
-				${Link("https://github.com/ihasq/libh/tree/main/docs/main.js", "source")} of this page is available.
+				${Link("https://github.com/ihasq/hstd/tree/main/docs/main.js", "source")} of this page is available.
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
 				<h2 ${{ [css.fontFamily]: 'Courier New' }}>Install</h2>
 
-				${CommandArea("npm i libh")}
+				${CommandArea("npm i hstd")}
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
-				<h2 ${{ [css.fontFamily]: 'Courier New' }}>Download</h2>
+				<h2 ${{ [css.fontFamily]: 'Courier New' }}>Usage</h2>
 
-				${CommandArea("import { $, h as html } from \"https://libh.dev\"")}
+				${CommandArea("import { $, h as html } from \"hstd\"")}
 			</div>
 
 			<div ${{ [css.margin]: "60px 0" }}>
@@ -131,7 +131,7 @@ export default function() {
 			<div ${{ [css.margin]: "60px 0" }}>
 				<h2 ${{ [css.fontFamily]: 'Courier New' }}>License</h2>
 
-				libh is ${Link("https://www.wtfpl.net", "WTFPL licensed")}.
+				Hstd is ${Link("https://www.wtfpl.net", "WTFPL licensed")}.
 			</div>
 
 	`;
