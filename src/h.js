@@ -45,12 +45,12 @@ const
 		}
 	},
 
-	bindResolver = (t, attrBody) => Reflect.ownKeys(attrBody).forEach(attrResolve.bind(null, t, attrBody)),
+	bindResolver = (id__ref, attrBody) => Reflect.ownKeys(attrBody).forEach(attrResolve.bind(null, id__ref, attrBody)),
 
-	attrResolve = function(t, attrBody, attrProp) {
+	attrResolve = function(id__ref, attrBody, attrProp) {
 
 		const
-			[id, ref] = t,
+			[id, ref] = id__ref,
 			attrValue = attrBody[attrProp],
 			attrPropType = typeof attrProp
 		;
@@ -58,14 +58,12 @@ const
 		if(attrPropType == "symbol") {
 
 			const attrPtr = globalThis[attrProp.description.slice(0, 52)]?.(attrProp);
-
 			if(!isPtr(attrPtr)) return;
 			
 			const buf = attrPtr.$(attrValue, ref);
-
 			if(buf?.constructor !== Object) return;
 
-			bindResolver(t, buf);
+			bindResolver(id__ref, buf);
 
 		} else if(attrPropType == "string") {
 
@@ -95,7 +93,7 @@ const
 		}
 	},
 
-	queryResolve = function(placeholder, tokenBuf, v, id, ref, index) {
+	resolveQuery = function([tokenBuf, placeholder], v, id, ref, index) {
 
 		const vBody = v[index];
 
@@ -116,14 +114,14 @@ const
 		ref.removeAttribute(tokenBuf);
 	},
 
-	elementTempBase = function (node, placeholder, fragmentTemp, tokenBuf, v) {
+	elementTempBase = function (tokenBuf__placeholder__node, v) {
 
 		const
-			newNode = node.cloneNode(!0),
+			newNode = tokenBuf__placeholder__node[2].cloneNode(!0),
 			id = {}
 		;
 		
-		newNode.querySelectorAll(`[${tokenBuf}]`).forEach(queryResolve.bind(null, placeholder, tokenBuf, v, id));
+		newNode.querySelectorAll(`[${tokenBuf__placeholder__node[0]}]`).forEach(resolveQuery.bind(null, tokenBuf__placeholder__node, v, id));
 
 		return Object.assign(
 
@@ -180,7 +178,7 @@ export const h = (s, ...v) => {
 				: `<br ${tokenBuf}>`
 		);
 
-		elementTempMap.set(s, createElementTemp = elementTempBase.bind(null, node, placeholder, fragmentTemp, tokenBuf))
+		elementTempMap.set(s, createElementTemp = elementTempBase.bind(null, [tokenBuf, placeholder, node]))
 	};
 
 	return createElementTemp(v)
