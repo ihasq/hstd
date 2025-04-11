@@ -1,14 +1,10 @@
-# 🐛 [h](https://libh.js.org)std
+# [h](https://libh.js.org)std
 [![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz_small.svg)](https://stackblitz.com/edit/vitejs-vite-vcga6uwx?file=main.js)
 [![NPM Version](https://img.shields.io/npm/v/hstd?logo=npm&color=%23CC3534)](https://www.npmjs.com/package/hstd)
 [![npm package minimized gzipped size](https://img.shields.io/bundlejs/size/hstd?logo=stackblitz)](https://bundlephobia.com/package/hstd)
 ```javascript
-// get ingredients
-
 import { $, h as html, on } from "hstd"
 
-
-// cook yours
 
 function Component() {
 
@@ -22,8 +18,6 @@ function Component() {
     `;
 }
 
-
-// throw into the DOM
 
 document.body.append(...Component());
 ```
@@ -43,9 +37,9 @@ Visit live [demo](https://ihasq.com/hstd/demo/count).
 npm i hstd
 ```
 
-## Download
+## Usage
 ```javascript
-import { $, h as html } from "https://hstd.dev";
+import { $, h as html } from "hstd";
 ```
 
 ## Examples
@@ -115,4 +109,4 @@ function Canvas() {
 
 ## License
 
-libh is [WTFPL licensed](LICENSE).
+hstd is [WTFPL licensed](LICENSE).
