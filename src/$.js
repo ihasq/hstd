@@ -254,16 +254,10 @@ const
 
 												isPtr(arg)
 
-													? (
-
-														arg.watch($ => (
-															argMap[i] = $,
-															ptrBuf.$ = reciever.$[prop](...argMap)
-														)),
-
-														arg.$
-
-													)
+													? arg.watch($ => (
+														argMap[i] = $,
+														ptrBuf.$ = reciever.$[prop](...argMap)
+													)).$
 
 													: arg
 											)),
@@ -293,8 +287,11 @@ const
 
 					} else {
 						
-						isPtr(newValue)
-
+						buffer[0][prop] = (
+							isPtr(newValue)
+								? newValue.watch($ => buffer[0][prop] = $).$
+								: newValue
+						)
 					}
 
 					return !0;
@@ -314,10 +311,7 @@ const
 			tempMatcherRegex = new RegExp(code, "g"),
 			vMap = v.map((vt, i) => (
 				isPtr(vt)
-					? (
-						vt.watch(() => (vMap[i] = vt.$, ptr.$ = refreshTemp())),
-						vt.$
-					)
+					? vt.watch(() => (vMap[i] = vt.$, ptr.$ = refreshTemp())).$
 					: vt
 			)),
 			refreshTemp = (x = 0) => temp.replaceAll(tempMatcherRegex, () => vMap[x++]),
