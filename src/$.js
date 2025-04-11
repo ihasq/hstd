@@ -14,6 +14,12 @@ const
 
 	PTR_IDENTIFIER = Symbol.for("PTR_IDENTIFIER"),
 
+	isPtr = (ptr) => ptr?.[PTR_IDENTIFIER],
+
+	isConstructedFrom = (object, proto) => object?.constructor === proto,
+
+	isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
+
 	logicOps = {
 		or:						(a, b) => a || b,
 		and:					(a, b) => a && b,
@@ -191,8 +197,6 @@ const
 
 	),
 
-	isPtr = (ptr) => ptr?.[PTR_IDENTIFIER],
-
 	createPtr = (value, setter = $ => $, options = {}) => {
 
 		const
@@ -221,7 +225,7 @@ const
 
 				const [tmp] = buffer;
 
-				return typeof tmp == "function" ? tmp.apply(null, args) : tmp;
+				return isConstructedFrom(tmp, Function) ? tmp.apply(null, args) : tmp;
 
 			}), { name: { value: formattedOptions.name } }),
 
@@ -233,39 +237,45 @@ const
 
 					return (
 
-						prop === "$"				? tmp
-						: prop === "refresh"		? execWatcher.bind(null, tmp, !0, reciever)
-						: prop === PTR_IDENTIFIER	? !0
+						prop === "$"											? tmp
+						: prop === "refresh"									? execWatcher.bind(null, tmp, !0, reciever)
+						: (prop === "constructor" || prop === PTR_IDENTIFIER)	? !0
+						: prop === Symbol.hasInstance							? () => !1
 
 						: (
 							opTemp[prop]?.bind?.(reciever, buffer) || (
 
-								typeof tmp[prop] == "function" ? function(...args) {
-							
-									const
-										argMap = args.map((arg, i) => (
+								isConstructedFrom(tmp[prop], Function)
 
-											isPtr(arg) ? (
+									? function(...args) {
+								
+										const
+											argMap = args.map((arg, i) => (
 
-												arg.watch($ => (
-													argMap[i] = $,
-													ptrBuf.$ = reciever.$[prop](...argMap)
-												)),
+												isPtr(arg)
 
-												arg.$
+													? (
 
-											)
-											: arg
-										)),
+														arg.watch($ => (
+															argMap[i] = $,
+															ptrBuf.$ = reciever.$[prop](...argMap)
+														)),
 
-										ptrBuf = reciever.into($ => $[prop](...argMap))
-									;
-		
-									return ptrBuf
-		
-								}
+														arg.$
 
-								: reciever.into($ => $[prop])
+													)
+
+													: arg
+											)),
+
+											ptrBuf = reciever.into($ => $[prop](...argMap))
+										;
+			
+										return ptrBuf
+			
+									}
+
+									: reciever.into($ => $[prop])
 
 							)
 						)
@@ -279,7 +289,7 @@ const
 
 						const tmp = setter ? setter(newValue) : newValue;
 
-						tmp instanceof Promise ? tmp.then(execWatcher) : execWatcher(tmp)
+						isConstructedFrom(tmp, Promise) ? tmp.then(execWatcher) : execWatcher(tmp)
 
 					}
 
@@ -291,8 +301,6 @@ const
 
 		)
 	},
-
-	isFrozenArray = (arr) => Object.isFrozen(arr) && Array.isArray(arr),
 
 	createTemp = (s, ...v) => {
 
@@ -316,7 +324,20 @@ const
 
 	},
 
-	$ = (...x) => (isFrozenArray(x[0]) && isFrozenArray(x[0]?.raw) ? createTemp : createPtr).apply(null, x)
+	// createEffect = (watcher, ...ptrs) => {
+
+	// 	const tmp = createPtr(watcher());
+
+	// 	ptrs.forEach((ptr) => ptr.watch(() => tmp.$ = watcher()));
+
+	// 	return tmp;
+
+	// },
+
+	$ = (x, ...y) => (
+		isFrozenArray(x) && isFrozenArray(x?.raw)	? createTemp
+		:											createPtr
+	).call(null, x, ...y)
 ;
 
 let signature;
