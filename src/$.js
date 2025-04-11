@@ -3,11 +3,11 @@ const
 	publishedPtr = {},
 
 	resolverSignatureGenCB = function*(length = 52) {
-		let buf;
-		for(let i = 0; i < length; i++) {
+		let buf, c = 0;
+		while(c++ < length) {
 			buf = Math.floor(Math.random() * 31)
 			yield 0x7f + buf + (buf > 0x8d) + (buf > 0x9c)
-		}
+		};
 	},
 
 	createSignature = () => String.fromCharCode(...resolverSignatureGenCB()),
@@ -197,7 +197,7 @@ const
 
 	),
 
-	createPtr = (value, setter = $ => $, options = {}) => {
+	createPtr = (value, [setter, options] = []) => {
 
 		const
 			watchers = [],
@@ -214,7 +214,7 @@ const
 				value,
 				watchers,
 				watcherInfo,
-				signature + (options.name || ""),
+				signature + (options?.name || ""),
 				execWatcher
 			]
 		;
@@ -291,6 +291,10 @@ const
 
 						isConstructedFrom(tmp, Promise) ? tmp.then(execWatcher) : execWatcher(tmp)
 
+					} else {
+						
+						isPtr(newValue)
+
 					}
 
 					return !0;
@@ -302,7 +306,7 @@ const
 		)
 	},
 
-	createTemp = (s, ...v) => {
+	createTemp = (s, v) => {
 
 		const
 			code = createSignature(),
@@ -334,10 +338,7 @@ const
 
 	// },
 
-	$ = (x, ...y) => (
-		isFrozenArray(x) && isFrozenArray(x?.raw)	? createTemp
-		:											createPtr
-	).call(null, x, ...y)
+	$ = (x, ...y) => (isFrozenArray(x) && isFrozenArray(x?.raw) ? createTemp : createPtr)(x, y)
 ;
 
 let signature;
