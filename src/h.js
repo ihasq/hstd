@@ -3,14 +3,7 @@ import { aEL } from "./on.js";
 
 const
 
-	TOKEN_LENGTH = 16,
 	HTML_IDENTIFIER = Symbol.for("HTML_IDENTIFIER"),
-
-	createToken = function*(length = TOKEN_LENGTH) {
-		for(let i = 0; i < length; i++) {
-			yield Math.floor(Math.random() * 26) + 97
-		}
-	},
 
 	elementTempMap = new WeakMap(),
 
@@ -33,8 +26,11 @@ const
 	},
 
 	refProxyHandler = {
+
 		get(target, prop) {
+
 			const targetValue = target[prop];
+
 			return (
 				typeof targetValue == "function" &&
 				targetValue.toString().endsWith("() { [native code] }")
@@ -42,6 +38,7 @@ const
 				? targetValue.bind(target)
 				: targetValue
 			;
+
 		}
 	},
 
@@ -117,7 +114,7 @@ const
 	elementTempBase = function (tokenBuf__placeholder__node, v) {
 
 		const
-			newNode = tokenBuf__placeholder__node[2].cloneNode(!0),
+			newNode = tokenBuf__placeholder__node[2](),
 			id = {}
 		;
 		
@@ -157,11 +154,12 @@ export const h = (s, ...v) => {
 			tokenBuf
 		;
 
-		while(joined.includes(tokenBuf = String.fromCharCode(...createToken())));
+		while(joined.includes(tokenBuf = "t" + (BigInt(Math.floor(Math.random() * Number.MAX_SAFE_INTEGER)) ** 8n).toString(36)));
 
 		joined = s.join(tokenBuf);
 
 		const
+			TOKEN_LENGTH = tokenBuf.length,
 			attrMatch = [...joined.matchAll(new RegExp(`<(?:(!--|\\/[^a-zA-Z])|(\\/?[a-zA-Z][^>\\s]*)|(\\/?$))[\\s].*?${tokenBuf}`, "g"))]
 				.map(({ 0: { length }, index }) => index + length)
 			,
@@ -178,7 +176,7 @@ export const h = (s, ...v) => {
 				: `<br ${tokenBuf}>`
 		);
 
-		elementTempMap.set(s, createElementTemp = elementTempBase.bind(null, [tokenBuf, placeholder, node]))
+		elementTempMap.set(s, createElementTemp = elementTempBase.bind(null, [tokenBuf, placeholder, node.cloneNode.bind(node, !0)]))
 	};
 
 	return createElementTemp(v)

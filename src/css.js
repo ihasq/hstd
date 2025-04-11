@@ -24,10 +24,7 @@ const
 				formedStylePropBuf,
 
 				isPtr(styleValue)
-					? (
-						styleValue.watch($ => styleDec.setProperty(formedStylePropBuf, $)),
-						styleValue.$
-					)
+					? styleValue.watch($ => styleDec.setProperty(formedStylePropBuf, $)).$
 					: styleValue
 			)
 		},

@@ -3,9 +3,9 @@ const
 	publishedPtr = {},
 
 	resolverSignatureGenCB = function*(length = 52) {
-		let buf, c = 0;
+		let c = 0;
 		while(c++ < length) {
-			buf = Math.floor(Math.random() * 31)
+			let buf = Math.floor(Math.random() * 31)
 			yield 0x7f + buf + (buf > 0x8d) + (buf > 0x9c)
 		};
 	},
@@ -233,46 +233,63 @@ const
 
 				get(_, prop, reciever) {
 
-					const [tmp] = buffer;
+					const
+						[tmp] = buffer,
+						typeofProp = typeof prop
+					;
 
 					return (
 
-						prop === "$"											? tmp
-						: prop === "refresh"									? execWatcher.bind(null, tmp, !0, reciever)
-						: (prop === "constructor" || prop === PTR_IDENTIFIER)	? !0
-						: prop === Symbol.hasInstance							? () => !1
+						// typeofProp == "string"
 
-						: (
-							opTemp[prop]?.bind?.(reciever, buffer) || (
+							// string
 
-								isConstructedFrom(tmp[prop], Function)
+							/**? */ prop === "$"											? tmp
+							: prop === "refresh"									? execWatcher.bind(null, tmp, !0, reciever)
+							: prop === "constructor"								? !0
 
-									? function(...args) {
-								
-										const
-											argMap = args.map((arg, i) => (
 
-												isPtr(arg)
+							: prop === PTR_IDENTIFIER		? !0
+							: prop === Symbol.hasInstance	? () => !1
 
-													? arg.watch($ => (
-														argMap[i] = $,
-														ptrBuf.$ = reciever.$[prop](...argMap)
-													)).$
+							: (
+								opTemp[prop]?.bind?.(reciever, buffer) || (
 
-													: arg
-											)),
+									isConstructedFrom(tmp[prop], Function)
 
-											ptrBuf = reciever.into($ => $[prop](...argMap))
-										;
-			
-										return ptrBuf
-			
-									}
+										? function(...args) {
+									
+											const
+												argMap = args.map((arg, i) => (
 
-									: reciever.into($ => $[prop])
+													isPtr(arg)
 
+														? arg.watch($ => (
+															argMap[i] = $,
+															ptrBuf.$ = reciever.$[prop](...argMap)
+														)).$
+
+														: arg
+												)),
+
+												ptrBuf = reciever.into($ => $[prop](...argMap))
+											;
+				
+											return ptrBuf
+				
+										}
+
+										: reciever.into($ => $[prop])
+
+								)
 							)
-						)
+
+							// symbol
+
+
+							// : (""
+
+							// )
 					);
 
 				},
